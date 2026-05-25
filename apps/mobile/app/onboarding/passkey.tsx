@@ -38,7 +38,7 @@ export default function PasskeyEnrollment() {
       //   4. setSignedToken(token); router.replace('/')
       // Stub for PR 1: pretend success, write a placeholder token so the
       // route guard treats us as enrolled. Real implementation gated on OPS-001.
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise<void>((r) => setTimeout(() => r(), 600));
       await setSignedToken('AUR5-PR1-STUB-TOKEN');
       router.replace('/');
     } catch (err) {

@@ -49,7 +49,7 @@ export default function HandleEntry() {
       // TODO (PR 2): replace stub with tRPC user.checkHandle + user.create.
       // Stub: assume the handle is available so the happy path can be exercised
       // locally. Real uniqueness check requires Supabase (blocked on OPS-001).
-      await new Promise((r) => setTimeout(r, 300));
+      await new Promise<void>((r) => setTimeout(() => r(), 300));
       await persistHandle(value);
       setState('ok');
       router.push('/onboarding/passkey');

@@ -1,10 +1,14 @@
 name: EAS Preview Update
 
+# Disabled on pull_request until EXPO_TOKEN secret is configured (OPS-001 territory).
+# Re-enable by adding the secret in repo settings and changing trigger to:
+#   on:
+#     pull_request:
+#       paths:
+#         - 'apps/mobile/**'
+#         - 'packages/core/**'
 on:
-  pull_request:
-    paths:
-      - 'apps/mobile/**'
-      - 'packages/core/**'
+  workflow_dispatch:
 
 jobs:
   preview:

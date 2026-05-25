@@ -3,9 +3,10 @@
  * (tRPC inputs, webhook handlers, DB write paths).
  */
 import { z } from 'zod';
+// Language type is the canonical export from ./types; we do not re-export it here.
+// languageSchema below derives its runtime shape from the same union ('en' | 'hi').
 
 export const languageSchema = z.enum(['en', 'hi']); // v1 launch set
-export type Language = z.infer<typeof languageSchema>;
 
 export const handleSchema = z
   .string()

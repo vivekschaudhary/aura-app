@@ -8,6 +8,7 @@ build/
 .next/
 .turbo/
 .expo/
+*.tsbuildinfo
 
 docs/dashboard.html
 
