@@ -274,6 +274,12 @@ _(none yet)_
   - **Status:** resolved in PR #2 fix commit — `useFocusEffect` + `BackHandler.addEventListener('hardwareBackPress', () => true)` added to `apps/mobile/app/onboarding/passkey.tsx` and `apps/mobile/app/onboarding/not-supported.tsx`. The comment in `apps/mobile/app/onboarding/_layout.tsx` already documented the per-screen pattern; the implementation finally matches the comment.
   - **Area (required, tag):** build / android / back-handling.
 
+- [2026-05-25] [Reviewer (Codex)] **`packages/db/src/passkey-credentials.ts` mishandles bytea encoding with Supabase/PostgREST** (`packages/db/src/passkey-credentials.ts:47-58` at PR #2 commit `3092843`). `insertPasskeyCredential` was passing `Uint8Array` directly to `.insert()`, which supabase-js JSON-serializes as `{"0":1,"1":2,...}` — Postgres rejects this for a bytea column. Reading side: PostgREST returns bytea as `'\x68656c6c6f'` (hex with `\x` prefix), not raw bytes, so `bytesToBase64url(data.credential_id)` was base64-encoding the literal text bytes of `\x...` rather than the credential bytes. Result: enrollment writes fail, and even if they didn't, `excludeCredentialIds` + future assertion lookups would mismatch. Code path is currently untested (no Supabase project — OPS-001 pending), which is why unit tests didn't catch it.
+  - **Severity (required, mandatory):** P1 (breaks AC4 + AC8 end-to-end — passkey credentials cannot be persisted or looked up correctly in production).
+  - **Owner (required, mandatory):** Engineer (fix in next commit on the PR 2 branch).
+  - **Status:** resolved in PR #2 fix commit — `bytesToPgHex` + `pgHexToBytes` helpers added to `packages/db/src/passkey-credentials.ts`; applied on both write (`credential_id` + `public_key`) and read (`credential_id`); 7 new unit tests in `packages/db/src/passkey-credentials.test.ts` cover the encoding helpers + a roundtrip suite. End-to-end validation against real Postgres still blocked on OPS-001.
+  - **Area (required, tag):** build / data / bytea-encoding / integration.
+
 ---
 
 _Story closed: <date>, brief link: docs/bets/AUR-1/brief.md_
