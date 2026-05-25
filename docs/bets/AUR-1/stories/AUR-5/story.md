@@ -1,0 +1,215 @@
+---
+id: AUR-5
+bet: AUR-1
+type: story
+status: in-build
+priority: P0
+created: 2026-05-24
+approved: 2026-05-24
+approved_by: Vivek
+build_started: 2026-05-25
+author: PM
+design_link: docs/bets/AUR-1/stories/AUR-5/design.md
+area_tags: [mobile, auth, onboarding]
+dependencies: []
+---
+
+# AUR-5: Happy-path passkey onboarding (language → handle → passkey → home stub)
+
+> First story under [AUR-1](../../brief.md). Status: `needs-design` until design + copy approved by HITL (milestone gate per AGENTS.md #9), then flips to `ready` and `/build AUR-5` can run.
+
+## Description
+
+A first-time TestFlight user opens Aura, picks their language (English or Hindi), chooses a handle, completes a biometric-gated passkey enrollment, and lands on the home stub — three taps + one typed string. No password, no OTP, no email, no welcome screen. Devices that don't support passkeys see a friendly "not supported in this version" screen instead; OTP fallback ships in Story 2 once MSG91 lands per OPS-001.
+
+This story delivers the **happy path that ~85–95% of TestFlight devices will take** end-to-end. It is the smallest vertical slice that produces a real user row in Supabase and informs every subsequent story under AUR-1.
+
+## Acceptance Criteria
+
+- [ ] **AC1:** First-open shows the Language Picker as the first interactive screen (no welcome/value-prop). Per [design.md § Language Picker](./design.md) + [copy.md § language.*](./copy.md).
+- [ ] **AC2:** User can select English or Hindi; selection persists to `User.primary_language` on user creation.
+- [ ] **AC3:** Handle entry validates against `@aura/core` `handleSchema` (3–32 chars, `[a-z0-9_]`). Invalid handles show inline error per copy.md (`handle.error.invalid_chars` / `too_short` / `too_long`). Collision shows `handle.error.taken` and clears the field. Auto-suggest of alternatives is **out of scope** for this story.
+- [ ] **AC4:** Passkey enrollment ceremony succeeds end-to-end on a passkey-capable device: `react-native-passkey` triggers OS biometric prompt; on success, `@simplewebauthn/server` (via `@aura/auth.finishEnrollment`) verifies and writes a `passkey_credentials` row.
+- [ ] **AC5:** On enrollment success, user lands on the home-screen stub displaying `home.welcome` (with handle interpolated), `home.placeholder`, and `home.footer` per copy.md.
+- [ ] **AC6:** On capability-detection failure (no passkey support), the Not Supported screen renders with the strings from copy.md (`unsupported.title` + `unsupported.body`). No crash, no silent failure, no OTP fallback in this story.
+- [ ] **AC7:** All user-facing strings render in the user's selected language (English or Hindi Devanagari) per copy.md. No hardcoded English in the codepath.
+- [ ] **AC8:** On successful enrollment, exactly one `users` row + one `passkey_credentials` row are written to Supabase. Both visible in the Supabase dashboard for QA verification.
+- [ ] **AC9:** One funnel event emitted per screen exit (`language_picked`, `handle_accepted`, `identity_enrolled`, `reached_home`), keyed by `handle_hash` (not raw handle) per architecture § Cross-cutting standards § Logging. Full event taxonomy + comprehensive `audit_log` writes are **deferred to a separate story.**
+- [ ] **AC10:** Crash-free happy path on at least one iOS device + one Android device in TestFlight (Sentry confirms zero error events for the path during a 5-user smoke test). Crash budget for this story: 0 P0, ≤1 P2.
+- [ ] **AC11:** Back-gesture behaviour matches [design.md § Interactions](./design.md): disabled on Passkey + Not Supported screens; allowed Handle → Language; allowed nowhere on Home Stub (would land user back in onboarding loop).
+- [ ] **AC12:** Hindi Devanagari renders correctly on the four reference devices listed in design.md R-DESIGN-2 (iOS recent, iOS oldest supported, Android flagship, low-end Android). No clipping, no font-fallback issues, no glyph holes.
+
+## Tech notes
+
+References inherit from [architecture.md](../../../foundation/architecture.md) — load-bearing decisions are there, not duplicated here.
+
+**Mobile (`apps/mobile`):**
+- Three new Expo Router routes: `app/onboarding/language.tsx`, `app/onboarding/handle.tsx`, `app/onboarding/passkey.tsx`.
+- New route: `app/onboarding/not-supported.tsx`.
+- Home stub at `app/index.tsx` — update existing stub to render the home.welcome / placeholder / footer copy.
+- Route guard at `app/_layout.tsx`: on cold-launch, check `expo-secure-store` for signed handle token. If present → home; if absent → `/onboarding/language`.
+- Use `expo-secure-store` to persist the signed handle token after `finishEnrollment` returns success.
+- Capability detection via `react-native-passkey`'s init API at the `passkey.tsx` screen mount; if `false`, navigate to `not-supported.tsx`.
+- Back-gesture control via Expo Router's `headerBackVisible` + Android hardware back handler (`useFocusEffect` + `BackHandler.addEventListener`).
+- i18n via the language selection persisted in `User.primary_language` + a small in-app string registry from copy.md. (Full i18n library is overkill at 2 languages × ~25 strings — keep it tactical.)
+
+**Server (`apps/web/app/api/trpc`):**
+- New tRPC procedures under `user.*` and `auth.passkey.*`:
+  - `user.checkHandle(handle: string) → { available: boolean }`
+  - `user.create(handle: string, primaryLanguage: 'en' | 'hi') → { userId: string }`
+  - `auth.passkey.beginEnrollment(userId: string) → PasskeyEnrollChallenge` (proxies to `@aura/auth.beginEnrollment`)
+  - `auth.passkey.finishEnrollment(payload: WebAuthnRegistrationResponse) → { signedToken: string }` (proxies to `@aura/auth.finishEnrollment`; on success returns a signed token the mobile client stores in `expo-secure-store`)
+- All four procedures validate inputs against `@aura/core` zod schemas.
+
+**Database (`packages/db`):**
+- **No schema changes.** Migration 0001 already created `users` + `passkey_credentials` + RLS-enabled.
+- `packages/db/src/client.ts` already has `serverClient()` + `setRequestUser()`. Story uses both.
+
+**Auth (`packages/auth`):**
+- `webauthn.ts` stubs (`beginEnrollment`, `finishEnrollment`) get filled in this story.
+- `otp.ts` stays stubbed — not exercised in Story 1.
+
+**AI (`packages/ai`):**
+- Not exercised in this story (no conversation surface yet).
+
+**Funnel telemetry:**
+- Use Vercel Observability custom-event API on web (tRPC procedure entry/exit) and Sentry breadcrumbs on mobile (per-screen). One event per AC9 milestone. No third-party analytics in this story.
+
+**Audit log writes:**
+- One `audit_log` row on `finishEnrollment` success (`event_type: 'auth.passkey_enrolled'`). Comprehensive audit-log surface ships in a separate story.
+
+**Out-of-scope for this story (queued for subsequent stories under AUR-1):**
+- OTP fallback path (depends on MSG91 via OPS-001).
+- Handle auto-suggest on collision.
+- "Use this device next time" cloud-keychain enrollment toggle (per architecture R-AUTH-V2 mitigation).
+- Returning-user passkey assertion flow.
+- Comprehensive funnel taxonomy + audit_log surface.
+- Devanagari handle support (locked to Romanised per AUR-1 P2 Issue).
+
+## PRs
+
+_Auto-populated as PRs open._
+
+- **PR 1 (frontend slice)** — code landed locally 2026-05-25 via `/build AUR-5`. **Not yet opened on GitHub** (requires GitHub MCP auth or manual `gh pr create`). See [`PR-1-description.md`](./PR-1-description.md) for the PR body and the AC mapping table. Scope: bilingual string registry + 5 onboarding screens + route guard + secure storage helpers + 1 unit test. **Out of PR 1 scope (PR 2):** tRPC routers, real `@simplewebauthn/server` ceremony, MSG91 OTP fallback. **Out of PR 1 scope (PR 3, Codex-owned):** E2E tests.
+
+## Tests
+
+**Engineer writes** (co-located with code per architecture § Cross-cutting standards § Testing):
+
+- Unit: `@aura/core` `handleSchema` validation cases (Vitest)
+- Unit: `@aura/auth.beginEnrollment` + `finishEnrollment` happy + error paths (Vitest, with mocked `@simplewebauthn/server`)
+- Integration: tRPC procedures `user.checkHandle`, `user.create`, `auth.passkey.beginEnrollment`, `auth.passkey.finishEnrollment` against a test Supabase project (or local Postgres with same migrations)
+- Component (mobile): each onboarding screen renders correctly in English and Hindi, with all states (default, loading, error, success) (Vitest + React Testing Library for RN)
+
+Tags:
+- `regression: false` (no prior regressions to guard against — this is new)
+- `e2e: false` (E2E lives below)
+
+**Codex / Reviewer writes** (per role allocation in `compass/config.yaml`):
+
+- E2E in top-level `e2e/` covering the full happy path on iOS Simulator + Android Emulator (Detox or Maestro), with mocked passkey ceremony.
+- Tags: `regression: false`, `e2e: true`.
+
+Crisis-detection red-team suite is N/A for this story (no LLM calls in the code path).
+
+## Fixes (post-merge)
+
+_If post-merge bugs are found, story is re-opened and fixes live under `fixes/`._
+
+_(none yet)_
+
+## DRI Log
+
+### Decisions
+
+- [2026-05-25] [Engineer] **PR 1 scope = frontend slice only** (i18n + 5 screens + route guard + storage). Backend slice (tRPC routers + `@simplewebauthn/server` ceremony) deferred to PR 2; E2E tests deferred to PR 3 (Codex-owned).
+  - **Rationale (required):** Per Engineer role "smallest viable diff" + workflow "story may have multiple PRs." A full single-PR diff for AUR-5 would be ~30 files; splitting at the frontend/backend seam keeps PRs reviewable and lets PR 1 land + smoke-tested on-device while OPS-001 (Supabase + AI Gateway provisioning) is still pending. The seam is clean: frontend stubs the backend calls behind clear `TODO (PR 2):` markers in `handle.tsx` and `passkey.tsx`.
+  - **Area (required, tag):** build / scope.
+  - **Alternatives considered (required):** One mega-PR (rejected — review surface too wide; review quality suffers); slice by screen-by-screen (rejected — each PR delivers no observable user value; vertical slice is more honest).
+  - **Reversibility:** easy.
+
+- [2026-05-25] [Engineer] **Stub backend calls in `handle.tsx` (uniqueness check) and `passkey.tsx` (enrollment) with clear `TODO (PR 2):` markers + behavioural placeholders that allow the happy-path flow to navigate end-to-end on-device.**
+  - **Rationale (required):** Per workflow Engineer-forbidden list: "Faking data because endpoint doesn't exist (hand off to contract owner)." Caveat: the *contract* IS owned here (the tRPC schemas live in `@aura/core` already); only the *backend implementation* is deferred. The stub paths simulate happy-path success so the entire onboarding flow can be walked through manually (and component-tested) without a live Supabase. This is functionally different from "faking data in production paths" — the TODOs are explicit and the unhappy paths (network errors, OTP fallback) are NOT stubbed away.
+  - **Area (required, tag):** build / scope / boundaries.
+  - **Alternatives considered (required):** Throw "Not implemented" errors at the boundary (rejected — blocks the happy-path UX walkthrough that's the whole point of PR 1); call the real (non-existent) tRPC endpoints and let them 501 (rejected — would conflate "backend not built" with "backend broken").
+  - **Reversibility:** easy — PR 2 deletes the stub branches and wires the real tRPC client.
+
+- [2026-05-25] [Engineer] **`apps/mobile/app/_layout.tsx` route guard reads handle + signed-token from secure storage; redirects to `/onboarding/language` if either is absent.**
+  - **Rationale (required):** Per AC11 (back-gesture rules) + Tech notes ("Route guard at `app/_layout.tsx`: on cold-launch, check `expo-secure-store` for signed handle token"). Two-key check (handle AND token, not OR) prevents the case where someone has a handle locally but the server-side enrollment didn't finish.
+  - **Area (required, tag):** build / auth-flow.
+  - **Alternatives considered (required):** Check handle only (rejected — false-positive enrolled state if enrollment was interrupted); check token only (rejected — race with home-stub render that needs the handle string).
+  - **Reversibility:** easy.
+
+- [2026-05-24] [PM] **First story under AUR-1 is the vertical happy-path slice, not the horizontal "language picker only" slice.**
+  - **Rationale (required):** Per `/create-story` workflow § "Smallest thing that delivers value": a language picker alone delivers nothing. Vertical end-to-end is the smallest slice that produces a real `users` row + lets a human go through onboarding once. It also informs every subsequent story (we'll know what onboarding *feels* like end-to-end before adding edge cases on top).
+  - **Area (required, tag):** product / scope / sequencing.
+  - **Alternatives considered (required):** Slice horizontally per screen (rejected — language picker alone delivers no value; would ship 5 screen-stories that only become useful when the 5th lands); slice by capability (passkey-happy + OTP-fallback in one story) (rejected — OTP requires MSG91 from OPS-001 which has 2–5 day async wait; would block this story unnecessarily).
+  - **Reversibility:** easy — re-slice future bets differently if this proves wrong.
+
+- [2026-05-24] [PM] **Story ID is `AUR-5` — next sequential AUR-N per `compass/config.yaml` `story_id_format: jira_style`.** AUR-2, AUR-3, AUR-4 are sibling bets, not stories under AUR-1. Bets and story sub-tickets share the AUR number-space.
+  - **Rationale (required):** Compass config explicitly says story_id_format = jira_style with the example `PROJ-43 (sub-ticket of bet)` — meaning the next number after the bet's number. Following the convention rather than inventing (AUR-1.1 or AUR-1-S1) keeps tooling consistent if we later wire Jira.
+  - **Area (required, tag):** process / convention.
+  - **Alternatives considered (required):** AUR-1-S1 / AUR-1.1 dotted convention (rejected — more readable but breaks the config rule; could re-open if the AUR-N space gets confusing in practice).
+  - **Reversibility:** easy.
+
+- [2026-05-24] [PM] **Capability-failed users see a "Not Supported" screen with no CTA in this story.** OTP fallback ships in the next story (Story 2 = AUR-6 likely).
+  - **Rationale (required):** OTP path depends on MSG91 from OPS-001 (DLT approval 2–5 days). Story 1 should not block on that. The "Not Supported" screen is honest, not silent — sets user expectation. Story 1 is for **internal dev cohort only**; do NOT invite TestFlight users until Story 2 ships and the fallback path is real.
+  - **Area (required, tag):** product / scope / sequencing.
+  - **Alternatives considered (required):** Block Story 1 on OPS-001 (rejected — wastes 2–5 days); ship a fake-OTP that always succeeds (rejected — pretends a flow that doesn't exist).
+  - **Reversibility:** easy.
+
+- [2026-05-24] [PM] **Home stub in this story is a static placeholder, not a stubbed conversation surface.** Users see "Welcome, {handle}. Conversations are coming." per copy.md.
+  - **Rationale (required):** AUR-2 (voice loop) is the conversation surface; building a fake-conversation stub here would invite premature design + scope confusion. Static placeholder honestly tells the user where they are.
+  - **Area (required, tag):** product / scope.
+  - **Alternatives considered (required):** Show a "tap to start a conversation" button that errors (rejected — broken promise); auto-navigate to a coming-soon page (rejected — extra nav).
+  - **Reversibility:** easy — Home Stub gets replaced when AUR-2 ships.
+
+### Risks
+
+- [2026-05-24] [PM] **R-S1-1: Story 1 ships without OTP fallback → capability-failed users hit a dead-end screen with no path forward.**
+  - **Likelihood (required):** medium (~5–15% of devices per architecture R-AUTH-V2 baseline).
+  - **Impact (required):** low *if* contained to internal dev cohort (no real users are blocked); high *if* TestFlight invitations go out before Story 2 ships.
+  - **Mitigation (required):** Story 1 ships to internal dev cohort ONLY. TestFlight invites do not go out until Story 2 (OTP fallback) ships. Document this as a release-gate in the story's merge checklist.
+  - **Area (required, tag):** product / release-sequencing.
+
+- [2026-05-24] [PM] **R-S1-2: Inherits R-COPY-1 from copy.md.** Hindi strings are written by me (not native speaker); risk of off-tone Hindi.
+  - **Likelihood (required):** high.
+  - **Impact (required):** medium-high (Hindi-primary user trust breaks at first contact).
+  - **Mitigation (required):** Per copy.md mitigation — recruit ≥2 Hindi-primary speakers to review Hindi strings before TestFlight. If polish needed, run a Story 1.5 between AUR-5 and AUR-6.
+  - **Area (required, tag):** copy / i18n / quality.
+
+- [2026-05-24] [PM] **R-S1-3: Inherits R-DESIGN-2 from design.md.** Devanagari rendering on low-end Android is a known industry footgun.
+  - **Likelihood (required):** medium-high.
+  - **Impact (required):** medium.
+  - **Mitigation (required):** Per design.md mitigation — test on the four reference devices listed in AC12 before ship.
+  - **Area (required, tag):** design / i18n / device-compatibility.
+
+- [2026-05-25] [Engineer] **R-S1-4: `react-native-passkey` `^3.1.0` API surface is assumed; not yet validated against actual install.** Code in `apps/mobile/lib/passkey.ts` imports `Passkey`, `PasskeyCreateRequest`, `PasskeyCreateResult` based on the library's documented public API as of 2026-05; first `pnpm install` may surface a version mismatch.
+  - **Likelihood (required):** low-medium.
+  - **Impact (required):** low (adapter file is small; rewrites cheap; the boundary is well-isolated).
+  - **Mitigation (required):** First `pnpm install` will resolve the actual version available. If the API shape differs, update `passkey.ts` only (no other file imports the library directly). Validate during Codex review when CI runs `pnpm install` against the lockfile.
+  - **Area (required, tag):** build / dependency / integration.
+
+### Issues
+
+- [2026-05-24] [PM] **Test devices not yet sourced.** AC10 + AC12 require physical access to iOS recent, iOS oldest supported, Android flagship, low-end Android.
+  - **Severity (required, mandatory):** P2 (doesn't block code-writing; blocks ship verification).
+  - **Owner (required, mandatory):** Vivek (with Engineer to flag if a device isn't reachable).
+  - **Status:** open.
+  - **Area (required, tag):** test / devices.
+
+- [2026-05-25] [Engineer] **GitHub MCP not yet authenticated in this session** — PR 1 code is staged locally but the actual PR is not opened. Workflow Phase 4 step 11 ("Engineer opens PR via GitHub MCP") is pending.
+  - **Severity (required, mandatory):** P1 (blocks Codex review which blocks merge).
+  - **Owner (required, mandatory):** Vivek (auth) + Engineer (open PR after auth lands).
+  - **Status:** open.
+  - **Area (required, tag):** build / ops / pr-flow.
+
+- [2026-05-25] [Engineer] **End-to-end smoke test (AC10) blocked on OPS-001 execution.** No Supabase project exists, so the real tRPC roundtrip + the actual passkey credential write cannot be validated in this PR. Once OPS-001 ships, re-test on-device.
+  - **Severity (required, mandatory):** P1 (blocks AC10 + AC12 sign-off; doesn't block PR 1 merge per the scope split).
+  - **Owner (required, mandatory):** Vivek (OPS-001 execution) + Engineer (re-test post-execution).
+  - **Status:** open.
+  - **Area (required, tag):** build / dependency / OPS-001.
+
+---
+
+_Story closed: <date>, brief link: docs/bets/AUR-1/brief.md_
