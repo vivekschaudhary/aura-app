@@ -13,21 +13,38 @@ import {
 } from 'react-native';
 import { handleSchema } from '@aura/core';
 import { useI18n } from '../../lib/i18n';
-import { setHandle as persistHandle } from '../../lib/storage';
+import { getLanguage, setHandle as persistHandle, setUserId } from '../../lib/storage';
+import { trpc } from '../../lib/trpc';
 
 type CheckState = 'idle' | 'checking' | 'invalid' | 'taken' | 'network' | 'ok';
+
+/**
+ * Normalize raw input: strip surrounding whitespace + lowercase. Per Codex
+ * P1 review of PR #1 (`apps/mobile/app/onboarding/handle.tsx:44-55`):
+ * `handleSchema` only accepts `[a-z0-9_]`, so a user typing `Ravi_2026`
+ * or autofill adding a trailing space was silently failing validation.
+ * We normalize on every keystroke so the visible input matches what gets
+ * sent to the server.
+ */
+function normalizeHandle(raw: string): string {
+  return raw.trim().toLowerCase();
+}
 
 /**
  * Handle Entry screen.
  *
  * Inline validation against `@aura/core` handleSchema (3–32 chars, [a-z0-9_]).
- * Submit triggers a uniqueness check (PR 2 will wire tRPC user.checkHandle;
- * for now the check is a local stub that always succeeds — flagged with TODO).
+ * Submit calls `user.checkHandle` then `user.create` (single round trip via
+ * tRPC batch). On 'CONFLICT' (handle taken) the field clears and the user
+ * retries; copy.md handle.error.taken renders inline.
  */
 export default function HandleEntry() {
   const { t } = useI18n();
   const [value, setValue] = useState('');
   const [state, setState] = useState<CheckState>('idle');
+
+  const utils = trpc.useUtils();
+  const createUser = trpc.user.create.useMutation();
 
   const liveValidation = (() => {
     if (!value) return null;
@@ -46,14 +63,26 @@ export default function HandleEntry() {
     if (!canSubmit) return;
     setState('checking');
     try {
-      // TODO (PR 2): replace stub with tRPC user.checkHandle + user.create.
-      // Stub: assume the handle is available so the happy path can be exercised
-      // locally. Real uniqueness check requires Supabase (blocked on OPS-001).
-      await new Promise<void>((r) => setTimeout(() => r(), 300));
-      await persistHandle(value);
+      const availability = await utils.user.checkHandle.fetch({ handle: value });
+      if (!availability.available) {
+        setState('taken');
+        setValue('');
+        return;
+      }
+      const language = (await getLanguage()) ?? 'en';
+      const { userId } = await createUser.mutateAsync({
+        handle: value,
+        primaryLanguage: language,
+      });
+      await Promise.all([persistHandle(value), setUserId(userId)]);
       setState('ok');
       router.push('/onboarding/passkey');
-    } catch {
+    } catch (err) {
+      if (isHandleTaken(err)) {
+        setState('taken');
+        setValue('');
+        return;
+      }
       setState('network');
     }
   };
@@ -82,7 +111,7 @@ export default function HandleEntry() {
           <TextInput
             value={value}
             onChangeText={(next) => {
-              setValue(next);
+              setValue(normalizeHandle(next));
               if (state === 'taken' || state === 'network') setState('idle');
             }}
             placeholder={t('handle.placeholder')}
@@ -125,6 +154,12 @@ export default function HandleEntry() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+function isHandleTaken(err: unknown): boolean {
+  if (typeof err !== 'object' || err === null) return false;
+  const e = err as { data?: { code?: string }; message?: string };
+  return e.data?.code === 'CONFLICT' || e.message === 'handle_taken';
 }
 
 const styles = StyleSheet.create({

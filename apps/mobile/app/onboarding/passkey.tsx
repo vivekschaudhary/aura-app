@@ -2,44 +2,70 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { useI18n } from '../../lib/i18n';
-import { isPasskeySupported } from '../../lib/passkey';
-import { setSignedToken } from '../../lib/storage';
+import { createPasskey, isPasskeySupported } from '../../lib/passkey';
+import {
+  getUserId,
+  setOnboardingTerminated,
+  setSignedToken,
+} from '../../lib/storage';
+import { trpc } from '../../lib/trpc';
 
 type State = 'ready' | 'finalising' | 'cancelled' | 'network';
 
 /**
  * Passkey Enrollment screen.
  *
- * Single-screen explanation + one button. Tapping triggers the OS biometric
- * prompt via `react-native-passkey`; on success the screen navigates to home.
+ * Capability detection on mount — devices without passkey support write the
+ * `onboardingTerminated` sentinel (Codex P1 review of PR #1) and route to
+ * `/onboarding/not-supported`. The sentinel makes the not-supported state
+ * sticky across cold launches instead of looping the user through
+ * onboarding repeatedly.
  *
- * Capability detection runs silently on mount — if the device can't create a
- * passkey, redirect to Not Supported before showing any of this screen.
+ * Happy path:
+ *   1. tRPC `auth.passkey.beginEnrollment` → options + opaque challengeToken
+ *   2. `Passkey.create(options)` → OS biometric prompt → signed attestation
+ *   3. tRPC `auth.passkey.finishEnrollment(challengeToken, attestation)`
+ *      → server verifies, writes `passkey_credentials` row, returns session
+ *      token
+ *   4. Persist token; navigate to home.
  */
 export default function PasskeyEnrollment() {
   const { t } = useI18n();
   const [state, setState] = useState<State>('ready');
 
+  const beginEnrollment = trpc.auth.passkey.beginEnrollment.useMutation();
+  const finishEnrollment = trpc.auth.passkey.finishEnrollment.useMutation();
+
   useEffect(() => {
     if (!isPasskeySupported()) {
-      router.replace('/onboarding/not-supported');
+      void (async () => {
+        await setOnboardingTerminated();
+        router.replace('/onboarding/not-supported');
+      })();
     }
   }, []);
 
   const onContinue = async () => {
     setState('finalising');
     try {
-      // TODO (PR 2): wire to tRPC auth.passkey.beginEnrollment + Passkey.create
-      // + auth.passkey.finishEnrollment. Real flow:
-      //   1. tRPC begin → server returns WebAuthn challenge
-      //   2. createPasskey(challenge) → OS biometric prompt → signed attestation
-      //   3. tRPC finish → server verifies, writes passkey_credentials row,
-      //      returns signed handle token
-      //   4. setSignedToken(token); router.replace('/')
-      // Stub for PR 1: pretend success, write a placeholder token so the
-      // route guard treats us as enrolled. Real implementation gated on OPS-001.
-      await new Promise<void>((r) => setTimeout(() => r(), 600));
-      await setSignedToken('AUR5-PR1-STUB-TOKEN');
+      const userId = await getUserId();
+      if (!userId) {
+        // Shouldn't be reachable — the route guard sends unenrolled users
+        // through handle.tsx first, which persists the userId.
+        throw new Error('missing_user_id');
+      }
+
+      const { options, challengeToken } = await beginEnrollment.mutateAsync({ userId });
+
+      const attestation = await createPasskey(options);
+
+      const { signedToken } = await finishEnrollment.mutateAsync({
+        userId,
+        challengeToken,
+        attestationResponse: attestation,
+      });
+
+      await setSignedToken(signedToken);
       router.replace('/');
     } catch (err) {
       const message = err instanceof Error ? err.message.toLowerCase() : '';

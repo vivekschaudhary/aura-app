@@ -2,19 +2,22 @@ import { Stack } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { I18nProvider } from '../lib/i18n';
-import { getHandle, getSignedToken } from '../lib/storage';
+import { TRPCProvider } from '../lib/trpc';
+import { getHandle, getOnboardingTerminated, getSignedToken } from '../lib/storage';
 
 /**
- * Root layout — wraps the app in I18nProvider and runs the route guard.
+ * Root layout — wraps the app in I18nProvider + TRPCProvider and runs the
+ * route guard.
  *
- * Route guard logic (per AUR-5 tech notes):
- *   - On cold-launch, check secure storage for signed handle token.
- *   - If present → user is enrolled → route to `/` (home stub).
- *   - If absent → user hasn't enrolled → route to `/onboarding/language`.
+ * Route guard logic (per AUR-5 tech notes + Codex PR #1 review):
+ *   1. If onboarding-terminated sentinel is set (device didn't support
+ *      passkeys) → straight to /onboarding/not-supported. No loop through
+ *      language → handle → passkey.
+ *   2. Else if handle + signed token both present → user is enrolled → land
+ *      on / (home stub).
+ *   3. Else → start onboarding at /onboarding/language.
  *
- * Back-gesture rules (per design.md):
- *   - Onboarding stack screens disable swipe-back (see app/onboarding/_layout.tsx).
- *   - Root home stack does not include onboarding screens in its stack.
+ * Back-gesture rules (per design.md) live in app/onboarding/_layout.tsx.
  */
 export default function RootLayout() {
   const [checked, setChecked] = useState(false);
@@ -22,9 +25,15 @@ export default function RootLayout() {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const [handle, token] = await Promise.all([getHandle(), getSignedToken()]);
+      const [handle, token, terminated] = await Promise.all([
+        getHandle(),
+        getSignedToken(),
+        getOnboardingTerminated(),
+      ]);
       if (cancelled) return;
-      if (!handle || !token) {
+      if (terminated) {
+        router.replace('/onboarding/not-supported');
+      } else if (!handle || !token) {
         router.replace('/onboarding/language');
       }
       setChecked(true);
@@ -39,8 +48,10 @@ export default function RootLayout() {
   if (!checked) return null;
 
   return (
-    <I18nProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </I18nProvider>
+    <TRPCProvider>
+      <I18nProvider>
+        <Stack screenOptions={{ headerShown: false }} />
+      </I18nProvider>
+    </TRPCProvider>
   );
 }
