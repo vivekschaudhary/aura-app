@@ -1,10 +1,10 @@
 # Project Status
 
-_Last updated: 2026-05-25 (`/build AUR-5` PR 1 code landed — frontend slice; story `in-build`; awaiting GitHub MCP auth to open PR)_
+_Last updated: 2026-05-25 (PR #2 merged — backend slice of AUR-5 on main; story stays `in-build` pending PR #3 Codex-owned E2E suite)._
 
 ## In flight
 
-- **AUR-5** (first story under AUR-1) — Happy-path passkey onboarding: language → handle → passkey → home stub. Status: `ready` (Vivek, 2026-05-24). **`/build AUR-5` can now run** — Engineer (Claude) implements, Codex reviews. See [`docs/bets/AUR-1/stories/AUR-5/`](./bets/AUR-1/stories/AUR-5/).
+- **AUR-5** (first story under AUR-1) — Happy-path passkey onboarding: language → handle → passkey → home stub. Status: `in-build`. **PR #1 merged 2026-05-25** (frontend slice + bilingual i18n + route guard, squash `ea6c8ef`). **PR #2 merged 2026-05-25** (backend slice — tRPC routers via new `@aura/api` package + real `@simplewebauthn/server` ceremony + `@aura/db` query helpers + migration `0007_passkey_extensions.sql`, squash `7ce397c`). 40 tests passing. Real end-to-end smoke test still blocked on OPS-001 (Supabase project). PR #3 (Codex-owned E2E suite per workflow Phase 3) is the remaining open work before AUR-5 ships. See [`docs/bets/AUR-1/stories/AUR-5/`](./bets/AUR-1/stories/AUR-5/).
 - **AUR-1** — Onboarding bet. Status: `approved`. First story (AUR-5) ready for build; Story 2 (OTP fallback) blocked on MSG91 via OPS-001.
 - **MVP-PORTFOLIO v1** — Status: `approved`. AUR-1 in active development; AUR-2/AUR-3/AUR-4 still stubs.
 - **OPS-001** — Status: `approved`. Awaiting Phase 3 human-led execution (still blocks Story 2 + TestFlight cohort invites).
