@@ -7,15 +7,18 @@
   "types": "./src/index.ts",
   "scripts": {
     "lint": "echo 'lint deferred (P2 issue: wire eslint at root)'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@aura/core": "workspace:*",
-    "@aura/db": "workspace:*",
-    "@simplewebauthn/server": "^11.0.0"
+    "@simplewebauthn/server": "^11.0.0",
+    "@simplewebauthn/types": "^11.0.0"
   },
   "devDependencies": {
     "@aura/config": "workspace:*",
-    "typescript": "^5.6.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
   }
 }

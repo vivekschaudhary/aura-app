@@ -7,22 +7,28 @@
     "build": "next build",
     "start": "next start",
     "lint": "echo 'lint deferred (P2 issue: wire eslint at root + next lint in follow-up)'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "echo 'web has no tests of its own — tRPC routers tested in @aura/api'"
   },
   "dependencies": {
     "@aura/ai": "workspace:*",
+    "@aura/api": "workspace:*",
     "@aura/auth": "workspace:*",
     "@aura/core": "workspace:*",
     "@aura/db": "workspace:*",
+    "@trpc/server": "^11.0.0",
     "next": "^16.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "superjson": "^2.2.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
     "@aura/config": "workspace:*",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
   }
 }

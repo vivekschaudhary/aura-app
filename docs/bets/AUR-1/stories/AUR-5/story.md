@@ -91,7 +91,7 @@ References inherit from [architecture.md](../../../foundation/architecture.md) �
 _Auto-populated as PRs open._
 
 - **[PR #1](https://github.com/vivekschaudhary/aura-app/pull/1) — feat(AUR-5): bilingual i18n + 5 onboarding screens + route guard** — opened 2026-05-25, **merged 2026-05-25** (merge commit `ea6c8ef`). Self-review only (no Codex review; deferred per Engineer DRI). Status: CI green (`7503cc6`); no deploy triggered (no Vercel project linked yet — OPS-001 territory). 18 files, 1317 insertions. See [`PR-1-description.md`](./PR-1-description.md). Scope: bilingual string registry + 5 onboarding screens + route guard + secure storage helpers + 1 unit test (6 cases passing).
-- **PR 2 (backend slice)** — _pending._ Will wire tRPC routers (`user.checkHandle`, `user.create`, `auth.passkey.{begin,finish}Enrollment`) + real `@simplewebauthn/server` ceremony + `@aura/db` query helpers. Cannot run end-to-end until OPS-001 (Supabase project) executes.
+- **PR 2 (backend slice)** — _opened 2026-05-25, awaiting Codex review._ Wires tRPC routers (`user.checkHandle`, `user.create`, `auth.passkey.{begin,finish}Enrollment`) via new `@aura/api` workspace package + real `@simplewebauthn/server` ceremony in `@aura/auth` + HMAC-signed challenge/session tokens + `@aura/db` query helpers (`users`, `passkey_credentials`, `audit_log`) + migration `0007_passkey_extensions.sql` (adds `credential_id`, tightens `aaguid`). Absorbs both Codex P1 findings (handle normalization + unsupported-device sentinel) from the post-merge review of PR #1. 33 tests passing (14 auth + 13 api + 6 i18n pre-existing). Cannot run end-to-end until OPS-001 (Supabase project) executes. See [`PR-2-description.md`](./PR-2-description.md).
 - **PR 3 (E2E tests)** — _pending._ Codex-owned per workflow Phase 3; covers AC1–AC11 happy path via Maestro / Detox.
 
 **Story status remains `in-build`** until all 3 PRs merge. Per workflow Phase 6 step 27: "Brief stays in-build until ALL stories of the brief have shipped." The brief itself (AUR-1) tracks all of AUR-5 + future stories (e.g., Story 2 = OTP fallback once MSG91 is unblocked by OPS-001).
@@ -137,6 +137,30 @@ _(none yet)_
   - **Area (required, tag):** build / scope / boundaries.
   - **Alternatives considered (required):** Throw "Not implemented" errors at the boundary (rejected — blocks the happy-path UX walkthrough that's the whole point of PR 1); call the real (non-existent) tRPC endpoints and let them 501 (rejected — would conflate "backend not built" with "backend broken").
   - **Reversibility:** easy — PR 2 deletes the stub branches and wires the real tRPC client.
+
+- [2026-05-25] [Engineer] **PR 2: Create `packages/api` workspace package to own tRPC router definitions.** Web mounts the HTTP handler; mobile type-imports `AppRouter`. Both depend on `@aura/api` instead of an apps/web→apps/mobile workspace edge.
+  - **Rationale (required):** The canonical tRPC monorepo pattern. Avoids exposing apps/web internals to apps/mobile, keeps the boundary between mount-point (HTTP) and contract (types) clean, and lets future non-web mounts (e.g. a separate edge function) reuse the same router without restructuring.
+  - **Area (required, tag):** build / architecture / boundaries.
+  - **Alternatives considered (required):** Routers live in `apps/web/lib/trpc/*`, mobile imports type from `@aura/web` (rejected — apps/* → apps/* dep + exposes web internals); inline AppRouter type in mobile (rejected — silent type drift between client and server).
+  - **Reversibility:** medium — collapsing back into apps/web would mean moving 5 files + 2 dep updates.
+
+- [2026-05-25] [Engineer] **PR 2: Stateless WebAuthn challenge handling via HMAC-signed tokens.** `beginEnrollment` returns an opaque `challengeToken` (HMAC-SHA256 over `{userId, challenge, exp}`, 5-min TTL). Client echoes the token back to `finishEnrollment`, which verifies signature + expiry. No server-side session store.
+  - **Rationale (required):** WebAuthn ceremonies are two-call (begin → device prompt → finish). The traditional pattern is to store the challenge server-side (Redis/Postgres) keyed by session. We have no session layer yet — and provisioning Redis/KV just for two-call ceremonies is premature. HMAC tokens are a standard alternative (same pattern Cognito + Auth0 use for transient flow state). Five-minute TTL matches typical WebAuthn ceremony length and bounds replay risk.
+  - **Area (required, tag):** build / auth / security.
+  - **Alternatives considered (required):** Redis-backed session store (rejected — premature infra); Postgres `webauthn_challenges` table with TTL cleanup (rejected — adds a migration + cleanup cron for transient state); skip challenge binding entirely (rejected — security regression).
+  - **Reversibility:** easy — swap the token store for a real session backing without changing the public router shape.
+
+- [2026-05-25] [Engineer] **PR 2: New migration `0007_passkey_extensions.sql` adds `credential_id bytea unique not null` and tightens `aaguid` to `not null`.** Backfills not needed (no Supabase project exists yet; safe to ship with 0001..0006).
+  - **Rationale (required):** Migration 0001 stored only an internal `uuidv7()` PK on `passkey_credentials`. That works for an immediate insert but breaks assertion (returning-user sign-in, Story 2) which needs to look up a credential by its WebAuthn-native id (sent by the device). Also breaks `excludeCredentials` on subsequent enrollments. `aaguid` is reported by every authenticator (zero-UUID for anonymous ones), so the column was nullable in name only.
+  - **Area (required, tag):** build / data-model.
+  - **Alternatives considered (required):** Store the credentialId as a base64-encoded text column (rejected — bytea is the spec-correct shape + faster to look up); defer the column to Story 2 (rejected — would need a migration mid-story which is messier than landing it now).
+  - **Reversibility:** easy on empty table; harder once user data exists (requires a column add + backfill before any assertion code can run).
+
+- [2026-05-25] [Engineer] **PR 2: Defer mobile component tests (per-screen Vitest + RN-testing-library).** Story Tests section names them; PR 2 ships unit (auth) + integration (tRPC procedures with mocked DB) only.
+  - **Rationale (required):** Setting up jest-expo / @testing-library/react-native is its own infra PR — it requires a separate test runner config (RN doesn't run under Vitest cleanly), Babel config for JSX-in-tests, and on-device tests for any keychain interaction. PR 1 also shipped without component tests for the same reason. The unhappy-path coverage on the tRPC procedures + auth ceremony catches most of what component tests would catch (state machine transitions, error mapping); UI-shape tests for the 5 screens add little signal until visual regression is also in place.
+  - **Area (required, tag):** build / test-coverage / scope.
+  - **Alternatives considered (required):** Wire jest-expo in this PR (rejected — scope explosion); skip backend tests too (rejected — auth ceremony + tRPC layer are exactly where regressions are highest-impact).
+  - **Reversibility:** easy — open a follow-up PR (call it AUR-5 PR 5 or a P2 Issue) for the component test infra.
 
 - [2026-05-25] [Engineer] **`apps/mobile/app/_layout.tsx` route guard reads handle + signed-token from secure storage; redirects to `/onboarding/language` if either is absent.**
   - **Rationale (required):** Per AC11 (back-gesture rules) + Tech notes ("Route guard at `app/_layout.tsx`: on cold-launch, check `expo-secure-store` for signed handle token"). Two-key check (handle AND token, not OR) prevents the case where someone has a handle locally but the server-side enrollment didn't finish.
@@ -188,11 +212,23 @@ _(none yet)_
   - **Mitigation (required):** Per design.md mitigation — test on the four reference devices listed in AC12 before ship.
   - **Area (required, tag):** design / i18n / device-compatibility.
 
-- [2026-05-25] [Engineer] **R-S1-4: `react-native-passkey` `^3.1.0` API surface is assumed; not yet validated against actual install.** Code in `apps/mobile/lib/passkey.ts` imports `Passkey`, `PasskeyCreateRequest`, `PasskeyCreateResult` based on the library's documented public API as of 2026-05; first `pnpm install` may surface a version mismatch.
+- [2026-05-25] [Engineer] **R-S1-4: `react-native-passkey` `^3.1.0` API surface is assumed; not yet validated against actual install.** PR 2 made `lib/passkey.ts` type-tolerant (`createPasskey(options: unknown): Promise<unknown>`) so the @simplewebauthn options shape can flow through without TS-rejecting on a minor version difference. Runtime validation still pending — only a real on-device run will confirm the wire shape matches.
   - **Likelihood (required):** low-medium.
   - **Impact (required):** low (adapter file is small; rewrites cheap; the boundary is well-isolated).
-  - **Mitigation (required):** First `pnpm install` will resolve the actual version available. If the API shape differs, update `passkey.ts` only (no other file imports the library directly). Validate during Codex review when CI runs `pnpm install` against the lockfile.
+  - **Mitigation (required):** First on-device run (post-OPS-001) validates the wire shape. If the API shape differs, update `passkey.ts` only. Type-tolerant API at the lib boundary means a version bump can't TS-break the screens.
   - **Area (required, tag):** build / dependency / integration.
+
+- [2026-05-25] [Engineer] **R-S1-5: WebAuthn challenge / session signing secrets must be ≥32 bytes of entropy and rotated periodically.** `WEBAUTHN_SIGNING_SECRET` + `SESSION_SIGNING_SECRET` (added to `.env.example` in PR 2) gate the entire passkey flow. A weak or leaked secret lets an attacker forge `challengeToken` (replay a known challenge against a stolen attestation) or `signedToken` (impersonate any user).
+  - **Likelihood (required):** low (only at risk if Vercel env compromised).
+  - **Impact (required):** high (account-takeover or replay-attack vector).
+  - **Mitigation (required):** Generate via `openssl rand -base64 32` per `.env.example` comment. Store in Vercel env (encrypted at rest). Document a quarterly rotation in OPS-001 successor runbook. Codex Security Reviewer should flag any code path that hardcodes or logs either secret.
+  - **Area (required, tag):** build / auth / security / ops.
+
+- [2026-05-25] [Engineer] **R-S1-6: `0007_passkey_extensions.sql` not yet applied to a real Postgres.** The migration assumes empty tables. If OPS-001 lands and migrations are applied out of order, or if any real rows exist before 0007 runs, the `not null` constraints on `credential_id` and `aaguid` will fail.
+  - **Likelihood (required):** low (no Supabase project exists yet — OPS-001 pending).
+  - **Impact (required):** medium (would block OPS-001 supabase provisioning until migration is rewritten).
+  - **Mitigation (required):** When OPS-001 runs, apply migrations in numerical order (0001 → 0007). Verify with `supabase db push --dry-run` first. If real rows somehow exist before 0007, add a backfill step (`update passkey_credentials set aaguid = '00000000-...' where aaguid is null`) before the `set not null`.
+  - **Area (required, tag):** build / data-model / migrations.
 
 ### Issues
 
@@ -223,8 +259,26 @@ _(none yet)_
 - [2026-05-25] [Reviewer (Codex)] **Unsupported-device users hit an onboarding loop on every cold launch** (`apps/mobile/app/_layout.tsx:24-29`). When `isPasskeySupported()` returns false the user is sent to `/onboarding/not-supported`, but no sentinel state is written to secure storage. On the next cold launch the root guard sees missing handle + signed token and routes them through `/onboarding/language` → `/onboarding/handle` → `/onboarding/passkey` again, only to fail at passkey-not-supported again — every single launch. Found by Codex review of merge commit `ea6c8ef` post-merge — the author (Engineer/Claude) missed it. Fix: persist a sentinel (e.g. `onboarding_terminated_unsupported: true` in expo-secure-store) when routing to `not-supported`, and have the root guard short-circuit to that screen directly when the sentinel is set.
   - **Severity (required, mandatory):** P1 (regresses AC11 graceful-degradation — degraded path becomes infinite loop, not terminal state; merged code).
   - **Owner (required, mandatory):** Engineer (absorb fix into PR 2 since `_layout.tsx` is being touched there anyway to wire real session/token checks).
-  - **Status:** open.
+  - **Status:** resolved in PR #2 — `aura.onboardingTerminated` sentinel persisted in `apps/mobile/lib/storage.ts`; root guard checks it FIRST and short-circuits to `/onboarding/not-supported`.
   - **Area (required, tag):** build / state / route-guard.
+
+- [2026-05-25] [Reviewer (Codex)] **Root layout calls `router.replace` from a render path that returned `null`** (`apps/mobile/app/_layout.tsx:46-47` in PR #2 v1). Expo Router throws "Attempted to navigate before mounting the Root Layout" when navigation methods fire inside the pre-mount window — breaks first-launch routing for users without a stored session and for unsupported-device routing. Found by Codex review of PR #2 commit `1776b0f`.
+  - **Severity (required, mandatory):** P1 (broken first-launch routing in production; would manifest as a black screen + nav error on every cold launch).
+  - **Owner (required, mandatory):** Engineer (fix in next commit on the PR 2 branch).
+  - **Status:** resolved in PR #2 fix commit — `Stack` is now rendered on every paint inside a `View` with `opacity: checked ? 1 : 0`, so router.replace from the useEffect always lands in a mounted navigator. The opacity gate hides the initial-route flash (~1 frame) without skipping the render.
+  - **Area (required, tag):** build / state / navigation / expo-router.
+
+- [2026-05-25] [Reviewer (Codex)] **Android hardware back not blocked on passkey + not-supported screens** (`apps/mobile/app/onboarding/_layout.tsx:17-20`). Stack-level `gestureEnabled: false` only suppresses the iOS swipe-back gesture; Android needs an explicit `BackHandler` listener. Currently Android users on the passkey or not-supported screens can back-navigate into earlier onboarding steps, violating the AC11 + design.md interaction policy. Found by Codex review of PR #2 commit `1776b0f`.
+  - **Severity (required, mandatory):** P2 (degrades AC11 on Android; iOS not affected; no data corruption).
+  - **Owner (required, mandatory):** Engineer (fix in next commit on the PR 2 branch).
+  - **Status:** resolved in PR #2 fix commit — `useFocusEffect` + `BackHandler.addEventListener('hardwareBackPress', () => true)` added to `apps/mobile/app/onboarding/passkey.tsx` and `apps/mobile/app/onboarding/not-supported.tsx`. The comment in `apps/mobile/app/onboarding/_layout.tsx` already documented the per-screen pattern; the implementation finally matches the comment.
+  - **Area (required, tag):** build / android / back-handling.
+
+- [2026-05-25] [Reviewer (Codex)] **`packages/db/src/passkey-credentials.ts` mishandles bytea encoding with Supabase/PostgREST** (`packages/db/src/passkey-credentials.ts:47-58` at PR #2 commit `3092843`). `insertPasskeyCredential` was passing `Uint8Array` directly to `.insert()`, which supabase-js JSON-serializes as `{"0":1,"1":2,...}` — Postgres rejects this for a bytea column. Reading side: PostgREST returns bytea as `'\x68656c6c6f'` (hex with `\x` prefix), not raw bytes, so `bytesToBase64url(data.credential_id)` was base64-encoding the literal text bytes of `\x...` rather than the credential bytes. Result: enrollment writes fail, and even if they didn't, `excludeCredentialIds` + future assertion lookups would mismatch. Code path is currently untested (no Supabase project — OPS-001 pending), which is why unit tests didn't catch it.
+  - **Severity (required, mandatory):** P1 (breaks AC4 + AC8 end-to-end — passkey credentials cannot be persisted or looked up correctly in production).
+  - **Owner (required, mandatory):** Engineer (fix in next commit on the PR 2 branch).
+  - **Status:** resolved in PR #2 fix commit — `bytesToPgHex` + `pgHexToBytes` helpers added to `packages/db/src/passkey-credentials.ts`; applied on both write (`credential_id` + `public_key`) and read (`credential_id`); 7 new unit tests in `packages/db/src/passkey-credentials.test.ts` cover the encoding helpers + a roundtrip suite. End-to-end validation against real Postgres still blocked on OPS-001.
+  - **Area (required, tag):** build / data / bytea-encoding / integration.
 
 ---
 
