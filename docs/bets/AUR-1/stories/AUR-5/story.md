@@ -90,7 +90,11 @@ References inherit from [architecture.md](../../../foundation/architecture.md) �
 
 _Auto-populated as PRs open._
 
-- **PR 1 (frontend slice)** — code landed locally 2026-05-25 via `/build AUR-5`. **Not yet opened on GitHub** (requires GitHub MCP auth or manual `gh pr create`). See [`PR-1-description.md`](./PR-1-description.md) for the PR body and the AC mapping table. Scope: bilingual string registry + 5 onboarding screens + route guard + secure storage helpers + 1 unit test. **Out of PR 1 scope (PR 2):** tRPC routers, real `@simplewebauthn/server` ceremony, MSG91 OTP fallback. **Out of PR 1 scope (PR 3, Codex-owned):** E2E tests.
+- **[PR #1](https://github.com/vivekschaudhary/aura-app/pull/1) — feat(AUR-5): bilingual i18n + 5 onboarding screens + route guard** — opened 2026-05-25, **merged 2026-05-25** (merge commit `ea6c8ef`). Self-review only (no Codex review; deferred per Engineer DRI). Status: CI green (`7503cc6`); no deploy triggered (no Vercel project linked yet — OPS-001 territory). 18 files, 1317 insertions. See [`PR-1-description.md`](./PR-1-description.md). Scope: bilingual string registry + 5 onboarding screens + route guard + secure storage helpers + 1 unit test (6 cases passing).
+- **PR 2 (backend slice)** — _pending._ Will wire tRPC routers (`user.checkHandle`, `user.create`, `auth.passkey.{begin,finish}Enrollment`) + real `@simplewebauthn/server` ceremony + `@aura/db` query helpers. Cannot run end-to-end until OPS-001 (Supabase project) executes.
+- **PR 3 (E2E tests)** — _pending._ Codex-owned per workflow Phase 3; covers AC1–AC11 happy path via Maestro / Detox.
+
+**Story status remains `in-build`** until all 3 PRs merge. Per workflow Phase 6 step 27: "Brief stays in-build until ALL stories of the brief have shipped." The brief itself (AUR-1) tracks all of AUR-5 + future stories (e.g., Story 2 = OTP fallback once MSG91 is unblocked by OPS-001).
 
 ## Tests
 
