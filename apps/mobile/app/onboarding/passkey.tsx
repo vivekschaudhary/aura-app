@@ -1,6 +1,6 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { BackHandler, Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { useI18n } from '../../lib/i18n';
 import { createPasskey, isPasskeySupported } from '../../lib/passkey';
 import {
@@ -44,6 +44,17 @@ export default function PasskeyEnrollment() {
       })();
     }
   }, []);
+
+  // Block Android hardware back while this screen is focused. Returning true
+  // from the listener swallows the event (RN BackHandler contract). Per Codex
+  // P2 review of PR #2 — the onboarding stack's `gestureEnabled: false` only
+  // suppresses iOS swipe-back; Android needs an explicit handler.
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+      return () => sub.remove();
+    }, []),
+  );
 
   const onContinue = async () => {
     setState('finalising');

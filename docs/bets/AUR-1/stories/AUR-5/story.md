@@ -259,8 +259,20 @@ _(none yet)_
 - [2026-05-25] [Reviewer (Codex)] **Unsupported-device users hit an onboarding loop on every cold launch** (`apps/mobile/app/_layout.tsx:24-29`). When `isPasskeySupported()` returns false the user is sent to `/onboarding/not-supported`, but no sentinel state is written to secure storage. On the next cold launch the root guard sees missing handle + signed token and routes them through `/onboarding/language` → `/onboarding/handle` → `/onboarding/passkey` again, only to fail at passkey-not-supported again — every single launch. Found by Codex review of merge commit `ea6c8ef` post-merge — the author (Engineer/Claude) missed it. Fix: persist a sentinel (e.g. `onboarding_terminated_unsupported: true` in expo-secure-store) when routing to `not-supported`, and have the root guard short-circuit to that screen directly when the sentinel is set.
   - **Severity (required, mandatory):** P1 (regresses AC11 graceful-degradation — degraded path becomes infinite loop, not terminal state; merged code).
   - **Owner (required, mandatory):** Engineer (absorb fix into PR 2 since `_layout.tsx` is being touched there anyway to wire real session/token checks).
-  - **Status:** open.
+  - **Status:** resolved in PR #2 — `aura.onboardingTerminated` sentinel persisted in `apps/mobile/lib/storage.ts`; root guard checks it FIRST and short-circuits to `/onboarding/not-supported`.
   - **Area (required, tag):** build / state / route-guard.
+
+- [2026-05-25] [Reviewer (Codex)] **Root layout calls `router.replace` from a render path that returned `null`** (`apps/mobile/app/_layout.tsx:46-47` in PR #2 v1). Expo Router throws "Attempted to navigate before mounting the Root Layout" when navigation methods fire inside the pre-mount window — breaks first-launch routing for users without a stored session and for unsupported-device routing. Found by Codex review of PR #2 commit `1776b0f`.
+  - **Severity (required, mandatory):** P1 (broken first-launch routing in production; would manifest as a black screen + nav error on every cold launch).
+  - **Owner (required, mandatory):** Engineer (fix in next commit on the PR 2 branch).
+  - **Status:** resolved in PR #2 fix commit — `Stack` is now rendered on every paint inside a `View` with `opacity: checked ? 1 : 0`, so router.replace from the useEffect always lands in a mounted navigator. The opacity gate hides the initial-route flash (~1 frame) without skipping the render.
+  - **Area (required, tag):** build / state / navigation / expo-router.
+
+- [2026-05-25] [Reviewer (Codex)] **Android hardware back not blocked on passkey + not-supported screens** (`apps/mobile/app/onboarding/_layout.tsx:17-20`). Stack-level `gestureEnabled: false` only suppresses the iOS swipe-back gesture; Android needs an explicit `BackHandler` listener. Currently Android users on the passkey or not-supported screens can back-navigate into earlier onboarding steps, violating the AC11 + design.md interaction policy. Found by Codex review of PR #2 commit `1776b0f`.
+  - **Severity (required, mandatory):** P2 (degrades AC11 on Android; iOS not affected; no data corruption).
+  - **Owner (required, mandatory):** Engineer (fix in next commit on the PR 2 branch).
+  - **Status:** resolved in PR #2 fix commit — `useFocusEffect` + `BackHandler.addEventListener('hardwareBackPress', () => true)` added to `apps/mobile/app/onboarding/passkey.tsx` and `apps/mobile/app/onboarding/not-supported.tsx`. The comment in `apps/mobile/app/onboarding/_layout.tsx` already documented the per-screen pattern; the implementation finally matches the comment.
+  - **Area (required, tag):** build / android / back-handling.
 
 ---
 
