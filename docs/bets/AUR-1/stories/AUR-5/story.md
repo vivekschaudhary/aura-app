@@ -205,7 +205,7 @@ _(none yet)_
 - [2026-05-25] [Engineer] **GitHub MCP not yet authenticated in this session** — PR 1 code is staged locally but the actual PR is not opened. Workflow Phase 4 step 11 ("Engineer opens PR via GitHub MCP") is pending.
   - **Severity (required, mandatory):** P1 (blocks Codex review which blocks merge).
   - **Owner (required, mandatory):** Vivek (auth) + Engineer (open PR after auth lands).
-  - **Status:** open.
+  - **Status:** resolved 2026-05-25 — PR #1 opened via `gh` CLI (`-R vivekschaudhary/aura-app`) and merged at commit `ea6c8ef`.
   - **Area (required, tag):** build / ops / pr-flow.
 
 - [2026-05-25] [Engineer] **End-to-end smoke test (AC10) blocked on OPS-001 execution.** No Supabase project exists, so the real tRPC roundtrip + the actual passkey credential write cannot be validated in this PR. Once OPS-001 ships, re-test on-device.
@@ -213,6 +213,18 @@ _(none yet)_
   - **Owner (required, mandatory):** Vivek (OPS-001 execution) + Engineer (re-test post-execution).
   - **Status:** open.
   - **Area (required, tag):** build / dependency / OPS-001.
+
+- [2026-05-25] [Reviewer (Codex)] **Handle input not normalized before schema validation or persistence** (`apps/mobile/app/onboarding/handle.tsx:44-55`). `handleSchema` enforces lowercase `[a-z0-9_]`, but `onSubmit` persists `value` exactly as typed. Users entering valid-looking handles with leading/trailing whitespace (e.g. autofill inserting a trailing space) or uppercase characters can be blocked by validation or, post PR 2, stored inconsistently depending on keyboard/autofill behavior. Found by Codex review of merge commit `ea6c8ef` post-merge — the author (Engineer/Claude) missed it. Fix: trim + lowercase the input before validation and persistence; reflect the normalization in the visible input as the user types.
+  - **Severity (required, mandatory):** P1 (real onboarding-failure mode against AC4; merged code).
+  - **Owner (required, mandatory):** Engineer (absorb fix into PR 2 since `handle.tsx` is being touched there anyway to wire the real `user.checkHandle` tRPC call).
+  - **Status:** open.
+  - **Area (required, tag):** build / ux / validation.
+
+- [2026-05-25] [Reviewer (Codex)] **Unsupported-device users hit an onboarding loop on every cold launch** (`apps/mobile/app/_layout.tsx:24-29`). When `isPasskeySupported()` returns false the user is sent to `/onboarding/not-supported`, but no sentinel state is written to secure storage. On the next cold launch the root guard sees missing handle + signed token and routes them through `/onboarding/language` → `/onboarding/handle` → `/onboarding/passkey` again, only to fail at passkey-not-supported again — every single launch. Found by Codex review of merge commit `ea6c8ef` post-merge — the author (Engineer/Claude) missed it. Fix: persist a sentinel (e.g. `onboarding_terminated_unsupported: true` in expo-secure-store) when routing to `not-supported`, and have the root guard short-circuit to that screen directly when the sentinel is set.
+  - **Severity (required, mandatory):** P1 (regresses AC11 graceful-degradation — degraded path becomes infinite loop, not terminal state; merged code).
+  - **Owner (required, mandatory):** Engineer (absorb fix into PR 2 since `_layout.tsx` is being touched there anyway to wire real session/token checks).
+  - **Status:** open.
+  - **Area (required, tag):** build / state / route-guard.
 
 ---
 
