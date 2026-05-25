@@ -1,14 +1,40 @@
 -- 0001_init.sql
 -- Foundational tables: users, passkey_credentials, audit_log.
 -- Conventions encoded here per docs/foundation/architecture.md § Foundational Data Model:
---   * UUID v7 ids (via pg_uuidv7 extension)
+--   * UUID v7 ids (RFC 9562 — time-ordered + sortable)
 --   * timestamptz UTC; created_at / updated_at / deleted_at
 --   * RLS enabled on all user-owned tables (policies tightened in feature bets)
 --   * audit_log immutable (no UPDATE / DELETE policy)
 
-create extension if not exists "pg_uuidv7";   -- provides uuidv7() — required for ids
-create extension if not exists "pgcrypto";    -- for hashing helpers
+create extension if not exists "pgcrypto";    -- gen_random_bytes for uuidv7() + hashing
 create extension if not exists "citext";      -- case-insensitive handle uniqueness
+
+-- ──────────────────────────────────────────────────────────────────────────────
+-- uuidv7() — RFC 9562 UUID version 7
+-- pg_uuidv7 (C extension) is not on Supabase ap-south-1's allow-list as of
+-- 2026-05-25 (R-OPS-2 hit during OPS-001 execution). Implementing in plpgsql
+-- instead — same wire shape, same time-ordered property, marginally slower
+-- than the C extension (invisible at our scale). Spec layout:
+--   bytes 0-5 : 48-bit unix-ms timestamp (big-endian)
+--   byte 6    : top 4 bits = 0111 (version 7), bottom 4 bits = random
+--   byte 7    : 8 bits random
+--   byte 8    : top 2 bits = 10 (RFC 4122 variant), bottom 6 bits = random
+--   bytes 9-15: 56 bits random
+-- ──────────────────────────────────────────────────────────────────────────────
+create or replace function uuidv7() returns uuid
+language plpgsql
+as $$
+declare
+  unix_ts_ms bytea;
+  uuid_bytes bytea;
+begin
+  unix_ts_ms := substring(int8send((extract(epoch from clock_timestamp()) * 1000)::bigint) from 3);
+  uuid_bytes := unix_ts_ms || gen_random_bytes(10);
+  uuid_bytes := set_byte(uuid_bytes, 6, (get_byte(uuid_bytes, 6) & 15) | 112); -- version = 7
+  uuid_bytes := set_byte(uuid_bytes, 8, (get_byte(uuid_bytes, 8) & 63) | 128); -- variant = RFC 4122
+  return encode(uuid_bytes, 'hex')::uuid;
+end
+$$;
 
 -- Helper: per-request user scoping for RLS policies (used by packages/db/src/client.ts).
 create or replace function set_request_user(user_id uuid)
