@@ -1,0 +1,6 @@
+apps/mobile
+docs
+compass
+*.md
+!apps/web/**/*.md
+.github

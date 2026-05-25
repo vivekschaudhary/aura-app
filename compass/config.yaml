@@ -111,6 +111,7 @@ disputes:
 setup:
   enforce_product_before_architecture: true
 
+<<<<<<< Updated upstream
 # ─── Continuous quality scanner ───────────────────────────────────────
 # Snyk-style continuous scanner across the six SDLC phases.
 # Findings, not failures. Severity + confidence + suppression.
@@ -130,3 +131,32 @@ scanner:
     medium:   owner_acceptance_logged       # auto-logged
     low:      silent_dismissal_logged       # still logged for audit
   cron: "0 6 * * 1"       # weekly Monday 6am scan of all active bets
+=======
+# ─── Stack (Phase A decisions, recorded 2026-05-24) ───────────────────
+# Source of truth: docs/foundation/architecture.md (FOUNDATION-ARCHITECTURE v1, approved 2026-05-24).
+stack:
+  repo_shape:           monorepo                    # Turborepo + pnpm workspaces
+  backend_language:     typescript                  # Node.js 24 LTS
+  backend_framework:    nextjs                      # Next.js 16 App Router
+  frontend_framework:   nextjs                      # Same (web/admin)
+  mobile_framework:     expo                        # Expo SDK 52+ (React Native, EAS)
+  database:             supabase                    # Postgres 16 + pgvector + Storage
+  database_region:      ap-south-1                  # India
+  vector_index:         pgvector_hnsw
+  contracts_format:     trpc                        # mobile↔server; Server Actions for web
+  auth_model:           passkey_primary_otp_fallback # WebAuthn synced + MSG91 OTP fallback
+  ai_orchestration:     vercel_ai_gateway           # Routes Claude + OpenAI per turn-criticality
+  ai_providers:         [anthropic, openai]
+  speech_provider:      bhashini                    # AI4Bharat; Sarvam fallback
+  deployment_target:    vercel                      # Region bom1
+  deployment_region:    bom1                        # Mumbai
+  cicd:                 github_actions              # + Vercel previews + EAS channels
+  observability:        sentry                      # + Vercel Observability + AI Gateway dashboard
+  secrets:              vercel_env                  # + EAS Secrets + Supabase project secrets
+  iac:                  deferred                    # Revisit when ops > 1 hr/week
+  cron_runner:          vercel_cron                 # Owned by enterprise_architect
+
+# v1 launch languages (per architecture decision 2026-05-24). Ramp to ≥6 by month 12 per product bet v2.
+launch_languages:       [en, hi]
+ramp_languages:         [ta, te, bn, mr, kn]        # Each gated by per-language quality eval (R-SPEECH)
+>>>>>>> Stashed changes

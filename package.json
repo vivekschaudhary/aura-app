@@ -1,0 +1,23 @@
+{
+  "name": "aura-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Aura — a vernacular, mobile-first AI counsel for the 536M underserved Indians.",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.6.0",
+    "prettier": "^3.3.0"
+  }
+}

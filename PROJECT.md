@@ -7,7 +7,9 @@ This file is a thin overview pointing to the foundation docs.
 
 ## What we're building
 
-_See `docs/foundation/product.md` for the foundational product bet._
+**Aura** — a vernacular, mobile-first, sub-₹20/month AI counsel for the 536M underserved Indians who have never had access to a mentor or trusted guide. Reflective questioning over advice; persistent memory over per-session chat; trust as the moat.
+
+See [`docs/foundation/product.md`](docs/foundation/product.md) for the foundational product bet (status: `proposed`) and [`docs/foundation/research.md`](docs/foundation/research.md) for the supporting evidence base.
 
 ## How we're building it
 
