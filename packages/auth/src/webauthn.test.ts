@@ -8,8 +8,8 @@ vi.mock('@simplewebauthn/server', () => ({
   verifyRegistrationResponse,
 }));
 
-import { beginEnrollment, finishEnrollment } from './webauthn.js';
-import { signChallengeToken } from './challenge-token.js';
+import { beginEnrollment, finishEnrollment } from './webauthn';
+import { signChallengeToken } from './challenge-token';
 
 const SECRET = 'test-secret-32-bytes-of-entropy.';
 const USER_ID = '018e2b16-7baf-7e3a-bc41-2a0a0b0a0a0a';

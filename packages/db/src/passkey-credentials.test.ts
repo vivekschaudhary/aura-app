@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bytesToPgHex, pgHexToBytes } from './passkey-credentials.js';
+import { bytesToPgHex, pgHexToBytes } from './passkey-credentials';
 
 /**
  * Per Codex P1 review of PR #2 commit 3092843 — bytea encoding bugs broke the

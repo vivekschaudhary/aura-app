@@ -10,7 +10,7 @@
 
 import { createHash } from 'node:crypto';
 import type { Language, UUID } from '@aura/core';
-import { serverClient } from './client.js';
+import { serverClient } from './client';
 
 export interface InsertUserInput {
   handle: string;

@@ -1,1 +1,1 @@
-export * from './strings.js';
+export * from './strings';

@@ -23,9 +23,9 @@ vi.mock('@aura/db', () => ({
   hashHandle: (h: string) => `hash:${h}`,
 }));
 
-import { createCallerFactory } from '../trpc.js';
-import { authPasskeyRouter } from './auth-passkey.js';
-import type { Context } from '../context.js';
+import { createCallerFactory } from '../trpc';
+import { authPasskeyRouter } from './auth-passkey';
+import type { Context } from '../context';
 
 const createCaller = createCallerFactory(authPasskeyRouter);
 

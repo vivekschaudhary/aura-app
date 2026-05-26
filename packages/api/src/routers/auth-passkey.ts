@@ -31,7 +31,7 @@ import {
   listCredentialIdsForUser,
 } from '@aura/db';
 import { z } from 'zod';
-import { publicProcedure, router, TRPCError } from '../trpc.js';
+import { publicProcedure, router, TRPCError } from '../trpc';
 
 const beginInput = z.object({
   userId: z.string().uuid(),

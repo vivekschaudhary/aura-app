@@ -11,9 +11,9 @@ vi.mock('@aura/db', () => ({
   hashHandle: (h: string) => `hash:${h}`,
 }));
 
-import { createCallerFactory } from '../trpc.js';
-import { userRouter } from './user.js';
-import type { Context } from '../context.js';
+import { createCallerFactory } from '../trpc';
+import { userRouter } from './user';
+import type { Context } from '../context';
 
 const createCaller = createCallerFactory(userRouter);
 

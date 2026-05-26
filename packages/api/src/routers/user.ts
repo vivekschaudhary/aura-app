@@ -9,7 +9,7 @@
 import { handleSchema, languageSchema } from '@aura/core';
 import { checkHandleAvailability, hashHandle, insertAuditLog, insertUser } from '@aura/db';
 import { z } from 'zod';
-import { publicProcedure, router, TRPCError } from '../trpc.js';
+import { publicProcedure, router, TRPCError } from '../trpc';
 
 const checkHandleInput = z.object({ handle: handleSchema });
 

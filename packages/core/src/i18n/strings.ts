@@ -12,7 +12,7 @@
  * Ramp languages (ta, te, bn, mr, kn) require per-language quality eval per R-SPEECH.
  */
 
-import type { Language } from '../types/index.js';
+import type { Language } from '../types/index';
 
 export const stringIds = [
   // Language Picker screen

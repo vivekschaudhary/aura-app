@@ -27,7 +27,7 @@ import {
   signChallengeToken,
   verifyChallengeToken,
   type VerifyResult as ChallengeVerifyResult,
-} from './challenge-token.js';
+} from './challenge-token';
 
 export interface BeginEnrollmentInput {
   userId: UUID;

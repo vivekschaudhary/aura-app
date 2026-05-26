@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { strings, stringIds, t } from './strings.js';
+import { strings, stringIds, t } from './strings';
 
 describe('i18n strings', () => {
   it('has identical key coverage across all languages', () => {

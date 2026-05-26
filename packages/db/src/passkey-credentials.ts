@@ -14,7 +14,7 @@
  */
 
 import type { UUID } from '@aura/core';
-import { serverClient } from './client.js';
+import { serverClient } from './client';
 
 export interface InsertPasskeyCredentialInput {
   userId: UUID;

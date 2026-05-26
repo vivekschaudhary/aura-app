@@ -4,7 +4,7 @@ import {
   signSessionToken,
   verifyChallengeToken,
   verifySessionToken,
-} from './challenge-token.js';
+} from './challenge-token';
 
 const SECRET = 'test-secret-32-bytes-of-entropy.';
 const OTHER_SECRET = 'different-secret-different-bytes.';

@@ -5,9 +5,9 @@
  * Type-imported by apps/mobile for client type inference.
  */
 
-import { router } from './trpc.js';
-import { userRouter } from './routers/user.js';
-import { authPasskeyRouter } from './routers/auth-passkey.js';
+import { router } from './trpc';
+import { userRouter } from './routers/user';
+import { authPasskeyRouter } from './routers/auth-passkey';
 
 export const appRouter = router({
   user: userRouter,

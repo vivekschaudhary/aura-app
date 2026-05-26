@@ -1,3 +1,3 @@
-export * from './webauthn.js';
-export * from './otp.js';
-export * from './challenge-token.js';
+export * from './webauthn';
+export * from './otp';
+export * from './challenge-token';
