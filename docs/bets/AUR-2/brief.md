@@ -38,11 +38,11 @@ estimate:
 
 > **STUB — portfolio-created 2026-05-24. Promote via `/create-brief AUR-2` to fill problem, scope, research, guardrails, and DRI before any design or build.**
 
-> **Highest novelty-risk bet in the portfolio per Researcher Decision** ([portfolio.md](../../foundation/portfolio.md) § DRI) — four uncommon pieces converge here (Bhashini speech in conversational context, AI Gateway tuned for Indian-language reflection, persistent-memory hooks, vernacular crisis classifier).
+> **Highest novelty-risk bet in the portfolio per Researcher Decision** ([portfolio.md](../../foundation/portfolio.md) § DRI) — four uncommon pieces converge here (Sarvam AI speech in conversational context — _post-2026-05-26 amendment, was Bhashini_; AI Gateway tuned for Indian-language reflection; persistent-memory hooks; vernacular crisis classifier).
 
 ## Hypothesis (the bet)
 
-If a user can speak in their language and get back a reflective question via **Bhashini ASR + AI Gateway (Claude / OpenAI) + Bhashini TTS**, **with same-session crisis escalation** wired into every turn, then they complete a **Reflection Session** as defined by the product north-star (≥3 meaningful turns + explicit end OR saved clarity moment) — traces to [product § North-star metric (WAR definition)](../../foundation/product.md) + [product § Guardrails (Safety: ≥99% same-session escalation)](../../foundation/product.md) + [architecture § Stack → AI orchestration + Speech + Crisis detection](../../foundation/architecture.md).
+If a user can speak in their language and get back a reflective question via **Sarvam AI ASR + AI Gateway (Claude / OpenAI) + Sarvam AI TTS** _(speech provider amended 2026-05-26 — was Bhashini; see [architecture amendment](../../foundation/architecture.md))_, **with same-session crisis escalation** wired into every turn, then they complete a **Reflection Session** as defined by the product north-star (≥3 meaningful turns + explicit end OR saved clarity moment) — traces to [product § North-star metric (WAR definition)](../../foundation/product.md) + [product § Guardrails (Safety: ≥99% same-session escalation)](../../foundation/product.md) + [architecture § Stack → AI orchestration + Speech + Crisis detection](../../foundation/architecture.md).
 
 ## What this bet ships (intent — not full scope)
 
@@ -69,7 +69,7 @@ _To be filled on promotion. (Hint: this IS the value loop; without it Aura is ju
 _In/out of scope filled on promotion. Note: multi-conversation sidebar is explicitly OUT — that's AUR-4. Memory recall is explicitly OUT — that's AUR-3. Ratings capture is explicitly OUT — post-MVP._
 
 ## Open questions for Researcher
-_Filled on promotion. Likely topics: Bhashini per-call latency profile under load; system-prompt eval methodology in vernacular; crisis classifier red-team test corpus._
+_Filled on promotion. Likely topics: Sarvam AI per-call latency profile under load (with self-hosted AI4Bharat OSS DR-fallback runbook); system-prompt eval methodology in vernacular; crisis classifier red-team test corpus._
 
 ## Research findings
 _Filled on promotion._
@@ -89,7 +89,8 @@ _Populated automatically by `/measure` cron after bet enters in-build._
 - [2026-05-24] [PM] Created as portfolio stub with crisis safety folded in (per [portfolio.md § DRI Decision #1](../../foundation/portfolio.md)). Full Decisions seeded on promotion.
 
 ### Risks
-- [2026-05-24] [Researcher] Inherits R-PORTFOLIO-1 (Bhashini conversational-quality assumption unvalidated) — see [portfolio.md § DRI Risks](../../foundation/portfolio.md). First story under this bet must be the pre-MVP quality eval.
+- [2026-05-24] [Researcher] Inherits R-PORTFOLIO-1 (speech-provider conversational-quality assumption unvalidated — provider amended 2026-05-26 from Bhashini to Sarvam AI per architecture SUPERSEDES decision; quality risk shape unchanged) — see [portfolio.md § DRI Risks](../../foundation/portfolio.md). First story under this bet must be the pre-MVP quality eval against Sarvam, with Whisper + native speech APIs evaluated for English.
+- [2026-05-26] [Engineer / Vivek] Inherits R-SPEECH-2 (vendor concentration + cost-floor with Sarvam-primary) from architecture amendment — see [architecture § DRI Risks 2026-05-26](../../foundation/architecture.md). First story or a dedicated DR-runbook story must produce a self-hosted-AI4Bharat-OSS fallback runbook before AUR-2 ships to TestFlight.
 
 ### Issues
 

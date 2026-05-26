@@ -1,13 +1,13 @@
 # Project Status
 
-_Last updated: 2026-05-26 (OPS-001 closed partial — Supabase + Vercel + AI Gateway provisioned; Sentry + Bhashini + MSG91 deferred; AUR-5 end-to-end smoke unblocked)._
+_Last updated: 2026-05-26 (OPS-001 closed partial — Supabase + Vercel + AI Gateway provisioned; Sentry + speech provider (Sarvam, post-amendment) + MSG91 deferred; AUR-5 end-to-end smoke unblocked. Architecture amended 2026-05-26 — speech provider Bhashini → Sarvam AI primary, AI4Bharat OSS as DR.)_
 
 ## In flight
 
 - **AUR-5** (first story under AUR-1) — Happy-path passkey onboarding: language → handle → passkey → home stub. Status: `in-build`. **PR #1 merged 2026-05-25** (frontend slice, squash `ea6c8ef`). **PR #2 merged 2026-05-25** (backend slice, squash `7ce397c`). 40 tests passing. **AUR-5 end-to-end smoke now unblocked** — Supabase + Vercel + AI Gateway live (OPS-001 partial). Next: manual on-device walkthrough against `https://aura-web-kind-tree.vercel.app` to validate AC4 + AC8 + AC10. PR #3 (Codex-owned E2E suite per workflow Phase 3) is the remaining open work before AUR-5 ships. See [`docs/bets/AUR-1/stories/AUR-5/`](./bets/AUR-1/stories/AUR-5/).
 - **AUR-1** — Onboarding bet. Status: `approved`. First story (AUR-5) ready for build; Story 2 (OTP fallback) blocked on MSG91 via OPS-001.
 - **MVP-PORTFOLIO v1** — Status: `approved`. AUR-1 in active development; AUR-2/AUR-3/AUR-4 still stubs.
-- **OPS-001** — Status: **partial-shipped** (2026-05-26). Supabase (ap-south-1) + Vercel (`aura-web` + region pin) + AI Gateway (Anthropic + OpenAI + ZDR) live; 5 secrets in Vercel env. Sentry deferred to post-50-user cohort; Bhashini deferred to AUR-2 promotion; MSG91 deferred to public-store launch / Story 2 of AUR-1. All deferrals logged as DRI Decisions in `docs/ops/OPS-001.md`. R-OPS-2 (pg_uuidv7 unavailable) resolved via plpgsql `uuidv7()` in migration 0001.
+- **OPS-001** — Status: **partial-shipped** (2026-05-26). Supabase (ap-south-1) + Vercel (`aura-web` + region pin) + AI Gateway (Anthropic + OpenAI + ZDR) live; 5 secrets in Vercel env. Sentry deferred to post-50-user cohort; **speech provider** (Sarvam AI per architecture amendment 2026-05-26 — superseded Bhashini) deferred to AUR-2 promotion; MSG91 deferred to public-store launch / Story 2 of AUR-1. All deferrals logged as DRI Decisions in `docs/ops/OPS-001.md`. R-OPS-2 (pg_uuidv7 unavailable) resolved via plpgsql `uuidv7()` in migration 0001.
 
 ## Awaiting human approval
 

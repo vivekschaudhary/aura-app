@@ -147,7 +147,7 @@ stack:
   auth_model:           passkey_primary_otp_fallback # WebAuthn synced + MSG91 OTP fallback
   ai_orchestration:     vercel_ai_gateway           # Routes Claude + OpenAI per turn-criticality
   ai_providers:         [anthropic, openai]
-  speech_provider:      bhashini                    # AI4Bharat; Sarvam fallback
+  speech_provider:      sarvam                      # Sarvam AI primary (amended 2026-05-26); self-hosted AI4Bharat OSS as DR fallback
   deployment_target:    vercel                      # Region bom1
   deployment_region:    bom1                        # Mumbai
   cicd:                 github_actions              # + Vercel previews + EAS channels
