@@ -749,7 +749,7 @@ _Populated automatically by `/measure` cron._
 - [2026-05-24] [Enterprise/Solution Architect] Vercel project (`bom1`), Supabase project (`ap-south-1`), AI Gateway provider keys, MSG91 account, Bhashini API keys not yet provisioned.
   - **Severity (required, mandatory):** P1 (blocks Phase B execution).
   - **Owner (required, mandatory):** Enterprise/Solution Architect (with Vivek for account ownership).
-  - **Status:** open.
+  - **Status:** **partial-resolved 2026-05-26** via OPS-001 partial execution. Supabase (`ap-south-1`) + Vercel (`aura-web`, function region `bom1`) + AI Gateway (Anthropic + OpenAI + ZDR + key in Vercel env) all live. MSG91 deferred until public-store launch (Story 2 of AUR-1); Bhashini deferred until AUR-2 promotion (model catalog freshness); Sentry deferred until post-50-user cohort. Each deferral logged as DRI Decision in `docs/ops/OPS-001.md`. Successor /ops to track the remaining 3.
   - **Area (required, tag):** infrastructure / setup.
 
 ---
