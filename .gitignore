@@ -49,3 +49,5 @@ supabase/.branches/
 supabase/.temp/
 .env*.local
 .env*
+
+package-lock.json
