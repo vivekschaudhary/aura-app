@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["42CS77Y589.app.aura.ios"],
+        "components": []
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["42CS77Y589.app.aura.ios"]
+  }
+}
