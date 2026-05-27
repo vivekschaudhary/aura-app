@@ -7,13 +7,9 @@ const config: ExpoConfig = {
   version: '0.0.1',
   newArchEnabled: true,
   orientation: 'portrait',
-  icon: './assets/icon.png',
+  // icon + splash use Expo defaults for the dev build. Branded assets
+  // ship before TestFlight (separate story per design.md).
   userInterfaceStyle: 'automatic',
-  splash: {
-    image: './assets/splash.png',
-    resizeMode: 'contain',
-    backgroundColor: '#ffffff',
-  },
   ios: {
     bundleIdentifier: 'com.kindtree.aura',
     supportsTablet: false,
