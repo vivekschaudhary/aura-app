@@ -12,8 +12,8 @@ parent: FOUNDATION-PRODUCT
 
 > Living, time-bound schedule for the MVP bet wedge. Derived from per-bet artifacts; refreshed by `/plan` (auto-triggered by `/advance`). Never hand-edited — re-run `/plan` to refresh.
 
-**Last refreshed:** 2026-05-26 (version 2 — first refinement after AUR-5 PR #1 + PR #2 merged + e2e smoke green on iOS device)
-**Total MVP runway estimate:** ~7 weeks (2026-05-24 → ~2026-07-10) · revised down from 9 weeks at seed; AUR-1 running ~12 days ahead of seed estimate
+**Last refreshed:** 2026-05-26 (Tue) — version 2 — first refinement after AUR-5 PR #1 + PR #2 merged + e2e smoke green on iOS device
+**Total MVP runway estimate:** ~6.5 weeks (2026-05-24 → ~2026-07-09) · revised down from 9 weeks at seed; AUR-1 running ~13 days ahead of seed estimate
 **Source artifacts:** [`portfolio.md`](./portfolio.md) (approved) · [AUR-1 brief](../bets/AUR-1/brief.md) (approved, in-build) · [AUR-5 story](../bets/AUR-1/stories/AUR-5/story.md) (in-build; PR #1 + #2 merged; AC1/2/3/7/8 partial/11 validated empirically) · AUR-2/3/4 (stubs)
 
 ## Currently in flight
@@ -22,15 +22,15 @@ AUR-1 entered build on 2026-05-25 with PR #1 (frontend slice) merged. PR #2 (bac
 
 | Bet | Title | Phase | Actual start | Estimated end | Owner |
 |-----|-------|-------|--------------|---------------|-------|
-| **AUR-1** | Onboarding — passkey + handle + language picker (en, hi) | Build | 2026-05-25 | 2026-06-02 | Engineer (Claude) + Reviewer (Codex) + Vivek |
+| **AUR-1** | Onboarding — passkey + handle + language picker (en, hi) | Build | 2026-05-25 | 2026-05-27 | Engineer (Claude) + Reviewer (Codex) + Vivek |
 
 ## Next up (unblocked, not yet started)
 
 | Bet | Title | Estimated start | Estimated duration | Confidence |
 |-----|-------|-----------------|---------------------|------------|
-| **AUR-2 brief promotion** | Voice reflection loop + crisis safety — `/create-brief` from stub | 2026-05-29 | 2 days (Researcher + PM) | medium |
-| **AUR-2 first story (Sarvam quality eval)** | Pre-MVP per-language voice eval | 2026-05-30 | ~1 week (1 sprint) | medium |
-| **AUR-2 full build** | ASR → LLM → TTS chain + crisis classifier | 2026-06-06 | 3 weeks | low (depends on eval outcome) |
+| **AUR-2 brief promotion** | Voice reflection loop + crisis safety — `/create-brief` from stub | 2026-05-28 (Thu) | 2 days (Researcher + PM) | medium |
+| **AUR-2 first story (Sarvam quality eval)** | Pre-MVP per-language voice eval | 2026-05-29 (Fri) | ~1 week (1 sprint) | medium |
+| **AUR-2 full build** | ASR → LLM → TTS chain + crisis classifier | 2026-06-05 (Fri) | 3 weeks | low (depends on eval outcome) |
 
 AUR-2's brief promotion is unblocked — depends only on AUR-1 build progress (not completion). Eval can start in parallel with AUR-1's last days. Full build gated on AUR-1 shipping + eval passing the quality bar.
 
@@ -48,7 +48,7 @@ AUR-2's brief promotion is unblocked — depends only on AUR-1 build progress (n
 
 ## Done
 
-_No MVP bets shipped yet, but AUR-5 story (first under AUR-1) is on track to ship 2026-06-02 — ~12 days ahead of original seed estimate._
+_No MVP bets shipped yet, but AUR-5 story (first under AUR-1) is on track to ship 2026-05-27 (Wed, Day 2 of the next-5-day plan) — ~18 days ahead of original seed estimate (2026-06-14)._
 
 | Bet | Title | Actual end | Duration (actual vs estimated) |
 |-----|-------|------------|-------------------------------|
@@ -58,39 +58,39 @@ _No MVP bets shipped yet, but AUR-5 story (first under AUR-1) is on track to shi
 
 | Bet | Title | Depends on | Est. start | Est. end | Actual start | Actual end | Duration (wk) | Confidence | Last refined by |
 |-----|-------|------------|------------|----------|--------------|------------|--------------:|------------|-----------------|
-| **AUR-1** | Onboarding — passkey + handle + language picker (en, hi) | — | 2026-05-24 | **2026-06-02** | 2026-05-25 | — | **1.5 actual** | **high** | smoke-green empirical observation 2026-05-26 (~12 days ahead of v1 seed) |
-| **AUR-2** | Core voice reflection loop + crisis safety | AUR-1 | **2026-05-29** (eval start; parallel with AUR-1 wrap) | **2026-06-26** | — | — | 4 | **medium** | promotion-imminent; Sarvam swap (architecture amendment 2026-05-26) reframes R-PORTFOLIO-1 — eval target is Sarvam, not Bhashini |
-| **AUR-3** | Persistent memory layer (the moat) | AUR-1, AUR-2 | **2026-06-27** | **2026-07-10** | — | — | 2 | low | stub |
-| **AUR-4** | Multi-conversation sidebar | AUR-1, AUR-2 | **2026-06-27** | **2026-07-10** | — | — | 2 | low | stub |
+| **AUR-1** | Onboarding — passkey + handle + language picker (en, hi) | — | 2026-05-24 | **2026-05-27** | 2026-05-25 | — | **0.5 actual** | **high** | smoke-green empirical observation 2026-05-26 (Tue); AUR-5 ships Wed 2026-05-27 (~18 days ahead of v1 seed) |
+| **AUR-2** | Core voice reflection loop + crisis safety | AUR-1 | **2026-05-28** (Thu — brief promotion; eval start Fri) | **2026-06-25** | — | — | 4 | **medium** | promotion-imminent; Sarvam swap (architecture amendment 2026-05-26) reframes R-PORTFOLIO-1 — eval target is Sarvam, not Bhashini |
+| **AUR-3** | Persistent memory layer (the moat) | AUR-1, AUR-2 | **2026-06-26** | **2026-07-09** | — | — | 2 | low | stub |
+| **AUR-4** | Multi-conversation sidebar | AUR-1, AUR-2 | **2026-06-26** | **2026-07-09** | — | — | 2 | low | stub |
 
 ## Calendar view
 
-Week numbers count from week-of-now (2026-05-26). Each week is Monday → Sunday (sprint cadence = 1 week per `compass/config.yaml`). v2 refresh shows AUR-1 wrapping in week 2 (vs week 3 in v1 seed); cascading earlier-end across the whole portfolio.
+Week numbers count from week-of-now (today Tue 2026-05-26). Each week is Monday → Sunday (sprint cadence = 1 week per `compass/config.yaml`). v2 refresh shows AUR-1 wrapping mid-week 1 (vs week 3 in v1 seed); cascading earlier-end across the whole portfolio.
 
 ```
 Week of:              | Wk 1  | Wk 2  | Wk 3  | Wk 4  | Wk 5  | Wk 6  | Wk 7  |
                       | 05-25 | 06-01 | 06-08 | 06-15 | 06-22 | 06-29 | 07-06 |
 ----------------------|-------|-------|-------|-------|-------|-------|-------|
-AUR-1 (onboarding)    |  ██   |  ▌    |       |       |       |       |       |
-AUR-2 brief + eval    |       |  ▌    |  ██   |       |       |       |       |
-AUR-2 (voice + safety)|       |       |       |  ██   |  ██   |       |       |
-AUR-3 (memory moat)   |       |       |       |       |       |  ██   |  ██   |
-AUR-4 (sidebar)       |       |       |       |       |       |  ██   |  ██   |
+AUR-1 (onboarding)    |  ▌    |       |       |       |       |       |       |  ships Wed 05-27
+AUR-2 brief + eval    |  ▌    |  ██   |       |       |       |       |       |  brief Thu 05-28; eval Fri 05-29 + Wk 2
+AUR-2 (voice + safety)|       |       |  ██   |  ██   |       |       |       |
+AUR-3 (memory moat)   |       |       |       |       |  ██   |  ██   |       |
+AUR-4 (sidebar)       |       |       |       |       |  ██   |  ██   |       |
 ```
 
 Legend: `██` full week of work, `▌` partial week (transition / overlap).
 
 Parallel streams (per portfolio): Stream 1 = AUR-1 → AUR-2 sequential gates (now compressed). Stream 2 = AUR-3 ∥ AUR-4 after AUR-2 ships.
 
-## Next 5 days (action plan, 2026-05-27 → 2026-06-02)
+## Next 5 days (action plan, 2026-05-26 → 2026-06-01)
 
 | Day | Date | Focus | Outputs |
 |-----|------|-------|---------|
-| 1 | Tue 2026-05-27 | **AC4 dev-build sprint** | `eas build --profile development` for iOS + Android; AASA file deployed at `apps/web/public/.well-known/`; Android Asset Links; bundle 2 UX cleanups (back-affordance on Handle, passkey error-state mapping). Walk full flow; verify `passkey_credentials` row + `auth.passkey_enrolled` audit_log entry in Supabase. |
-| 2 | Wed 2026-05-28 | **PR #3 — Codex-owned E2E suite** | Maestro or Detox E2E covering AC1–AC11 against the dev build. 1 Codex review pass + merge. AUR-5 flips to `merged`. Update `changelog.md` + `status.md`. |
-| 3 | Thu 2026-05-29 | **`/create-brief AUR-2` + 3 runbooks** | AUR-2 brief approved; first story scoped (Sarvam quality eval). Three runbooks codifying today's 14-item framework catalog (`pnpm-monorepo-rn`, `vercel-pnpm-monorepo`, `expo-go-vs-dev-build`). |
-| 4 | Fri 2026-05-30 | **Sarvam provisioning + eval Day 1** | `/ops OPS-003` for Sarvam: KYC, API key, push to Vercel env. Wire `packages/ai/src/speech.ts` against Sarvam. Collect 10–20 reflection-style Hindi samples from self + 2 native-speaker reviewers (also addresses R-COPY-1 mitigation). First ASR + TTS pass; WER + MOS measurements. |
-| 5 | Mon 2026-06-02 | **Q3 OKR foundations + plan/dashboard refresh** | Persona-validation interview protocol (Q3 OKR KR2; R1/R-PERSONA). Funding plan outline (Q3 OKR KR4; R6). Re-run `/plan` + `/dashboard` for stakeholder view. AUR-5 ships fully if Day 1 + Day 2 went green. |
+| 1 | **Tue 2026-05-26 (today)** | **AC4 dev-build sprint** | `eas build --profile development` for iOS + Android; AASA file deployed at `apps/web/public/.well-known/`; Android Asset Links; bundle 2 UX cleanups (back-affordance on Handle, passkey error-state mapping). Walk full flow; verify `passkey_credentials` row + `auth.passkey_enrolled` audit_log entry in Supabase. |
+| 2 | Wed 2026-05-27 | **PR #3 — Codex-owned E2E suite** | Maestro or Detox E2E covering AC1–AC11 against the dev build. 1 Codex review pass + merge. AUR-5 flips to `merged`. Update `changelog.md` + `status.md`. |
+| 3 | Thu 2026-05-28 | **`/create-brief AUR-2` + 3 runbooks** | AUR-2 brief approved; first story scoped (Sarvam quality eval). Three runbooks codifying the 14-item framework catalog (`pnpm-monorepo-rn`, `vercel-pnpm-monorepo`, `expo-go-vs-dev-build`). |
+| 4 | Fri 2026-05-29 | **Sarvam provisioning + eval Day 1** | `/ops OPS-003` for Sarvam: KYC, API key, push to Vercel env. Wire `packages/ai/src/speech.ts` against Sarvam. Collect 10–20 reflection-style Hindi samples from self + 2 native-speaker reviewers (also addresses R-COPY-1 mitigation). First ASR + TTS pass; WER + MOS measurements. |
+| 5 | Mon 2026-06-01 | **Q3 OKR foundations + plan/dashboard refresh** | Persona-validation interview protocol (Q3 OKR KR2; R1/R-PERSONA). Funding plan outline (Q3 OKR KR4; R6). Re-run `/plan` + `/dashboard` for stakeholder view. AUR-5 ships fully if Day 1 + Day 2 went green. |
 
 ## Refinement log
 
@@ -113,15 +113,16 @@ Each time a date moves, this table appends one row. The triggering artifact is n
 | 2026-05-24 | AUR-4 | estimated_end | (none) | 2026-07-26 | seed (start + 2wk) |
 | **2026-05-25** | **AUR-1** | **actual_start** | (none) | **2026-05-25** | First PR opened (PR #1 frontend slice, commit `da3db57`) |
 | **2026-05-25** | **AUR-1** | _no date change_ | — | — | PR #1 + PR #2 (backend) merged same day (squash `ea6c8ef` + `7ce397c`); confidence remains high |
-| **2026-05-26** | **AUR-1** | **estimated_end** | 2026-06-14 | **2026-06-02** | AUR-5 e2e smoke green; ACs 1/2/3/7/8(partial)/11 empirically validated; only AC4 (dev build + AASA) + PR #3 (E2E) outstanding — both bounded to ~5 working days |
-| **2026-05-26** | **AUR-1** | **duration_weeks** | 3 | **1.5** | actual progress since 2026-05-25 (PRs land in days, not weeks) |
-| **2026-05-26** | **AUR-2** | **estimated_start** | 2026-06-15 | **2026-05-29** | brief promotion can start during AUR-1's last days (parallel-stream candidate); eval kicks off Day 3 of next 5-day plan |
-| **2026-05-26** | **AUR-2** | **estimated_end** | 2026-07-12 | **2026-06-26** | start moves 17 days earlier; duration unchanged (4wk) |
+| **2026-05-26** | **AUR-1** | **estimated_end** | 2026-06-14 | **2026-05-27** | AUR-5 e2e smoke green Tue 2026-05-26; AUR-5 ships Wed 2026-05-27 after AC4 (Day 1, today) + PR #3 (Day 2). |
+| **2026-05-26** | **AUR-1** | **duration_weeks** | 3 | **0.5** | actual: 3 days from first PR open (Mon 2026-05-25) to ship (Wed 2026-05-27) |
+| **2026-05-26** | **AUR-2** | **estimated_start** | 2026-06-15 | **2026-05-28** | brief promotion (Thu Day 3) starts in parallel with AUR-1 final wrap; eval kicks off Fri Day 4 |
+| **2026-05-26** | **AUR-2** | **estimated_end** | 2026-07-12 | **2026-06-25** | start moves 18 days earlier; duration unchanged (4wk) |
 | **2026-05-26** | **AUR-2** | confidence | low | **medium** | architecture amendment 2026-05-26 (Sarvam swap) reduces R-PORTFOLIO-1's surface from "validate Bhashini quality" to "validate Sarvam quality with proven OSS DR fallback" |
-| **2026-05-26** | **AUR-3** | **estimated_start** | 2026-07-13 | **2026-06-27** | AUR-2 estimated_end + 1 day (cascaded earlier) |
-| **2026-05-26** | **AUR-3** | **estimated_end** | 2026-07-26 | **2026-07-10** | start moves 16 days earlier; duration unchanged (2wk) |
-| **2026-05-26** | **AUR-4** | **estimated_start** | 2026-07-13 | **2026-06-27** | parallel with AUR-3 |
-| **2026-05-26** | **AUR-4** | **estimated_end** | 2026-07-26 | **2026-07-10** | parallel with AUR-3 |
+| **2026-05-26** | **AUR-3** | **estimated_start** | 2026-07-13 | **2026-06-26** | AUR-2 estimated_end + 1 day (cascaded earlier) |
+| **2026-05-26** | **AUR-3** | **estimated_end** | 2026-07-26 | **2026-07-09** | start moves 17 days earlier; duration unchanged (2wk) |
+| **2026-05-26** | **AUR-4** | **estimated_start** | 2026-07-13 | **2026-06-26** | parallel with AUR-3 |
+| **2026-05-26** | **AUR-4** | **estimated_end** | 2026-07-26 | **2026-07-09** | parallel with AUR-3 |
+| **2026-05-26** | _all bets_ | _date correction_ | (v2 initial post-2026-05-26 14:00 IST) | _(corrected)_ | Off-by-one fix: I initially treated today (Tue 2026-05-26) as Mon 2026-05-25 and shifted all "next 5 days" dates +1. Corrected after user catch. Plan dates now have Day 1 = today; AUR-1 ships Day 2 (Wed 2026-05-27); AUR-2 brief promotion Day 3 (Thu 2026-05-28); MVP runway ~6.5 weeks ending ~2026-07-09. |
 
 ## Risks to plan
 
