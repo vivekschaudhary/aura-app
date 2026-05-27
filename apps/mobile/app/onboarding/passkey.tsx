@@ -79,6 +79,21 @@ export default function PasskeyEnrollment() {
       await setSignedToken(signedToken);
       router.replace('/');
     } catch (err) {
+      // Diagnostic logging for the AC4 dev-build smoke. The default catch
+      // maps every non-cancel error to a generic "network" UI state, which
+      // hides the real cause (most often: AASA propagation issue, Associated
+      // Domains entitlement missing, or react-native-passkey API mismatch).
+      // TODO: remove these console.error lines once AC4 is empirically green;
+      // keep the differentiated states (cancelled vs unsupported vs network)
+      // per the misleading-error-UX Issue logged in the AUR-5 story DRI.
+      // eslint-disable-next-line no-console
+      console.error('[passkey] enrollment failed:', err);
+      if (err instanceof Error) {
+        // eslint-disable-next-line no-console
+        console.error('[passkey] err.name=', err.name, 'err.message=', err.message);
+        // eslint-disable-next-line no-console
+        console.error('[passkey] err.stack=', err.stack);
+      }
       const message = err instanceof Error ? err.message.toLowerCase() : '';
       setState(message.includes('cancel') ? 'cancelled' : 'network');
     }

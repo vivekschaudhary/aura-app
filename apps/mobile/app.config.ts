@@ -13,6 +13,16 @@ const config: ExpoConfig = {
   ios: {
     bundleIdentifier: 'com.kindtree.aura',
     supportsTablet: false,
+    // Associated Domains — iOS reads these at install time to establish
+    // which domains the app is allowed to bind WebAuthn / universal links
+    // to. Without webcredentials:<rpId>, WebAuthn calls fail with
+    // "RequestFailed: No Credentials were returned" (the AC4 smoke
+    // failure mode observed 2026-05-27 on the local-built dev .ipa).
+    // The matching AASA file is served from apps/web/public/.well-known/.
+    associatedDomains: [
+      'webcredentials:aura-web-kind-tree.vercel.app',
+      'applinks:aura-web-kind-tree.vercel.app',
+    ],
     infoPlist: {
       NSMicrophoneUsageDescription:
         'Aura uses your microphone so you can speak in the language you think in.',
