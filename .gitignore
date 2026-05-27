@@ -48,3 +48,4 @@ pnpm-debug.log*
 supabase/.branches/
 supabase/.temp/
 .env*.local
+.env*

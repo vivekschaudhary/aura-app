@@ -5,6 +5,7 @@ const config: ExpoConfig = {
   slug: 'aura',
   scheme: 'aura',
   version: '0.0.1',
+  newArchEnabled: true,
   orientation: 'portrait',
   icon: './assets/icon.png',
   userInterfaceStyle: 'automatic',
