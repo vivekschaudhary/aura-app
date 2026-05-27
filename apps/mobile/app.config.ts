@@ -2,7 +2,7 @@ import type { ExpoConfig } from 'expo/config';
 
 const config: ExpoConfig = {
   name: 'Aura',
-  slug: 'aura',
+  slug: 'aura-app',
   scheme: 'aura',
   version: '0.0.1',
   newArchEnabled: true,
@@ -15,7 +15,7 @@ const config: ExpoConfig = {
     backgroundColor: '#ffffff',
   },
   ios: {
-    bundleIdentifier: 'app.aura.ios',
+    bundleIdentifier: 'com.kindtree.aura',
     supportsTablet: false,
     infoPlist: {
       NSMicrophoneUsageDescription:
@@ -23,13 +23,12 @@ const config: ExpoConfig = {
     },
   },
   android: {
-    package: 'app.aura.android',
+    package: 'com.kindtree.aura',
     permissions: ['RECORD_AUDIO'],
   },
   extra: {
-    // EAS project id placeholder — set after `eas init`
     eas: {
-      projectId: 'TODO_SET_AFTER_EAS_INIT',
+      projectId: '7331f1ee-c90c-4467-b4a4-4e5bf6feaa91',
     },
   },
   plugins: ['expo-router', 'expo-secure-store', 'expo-av'],
