@@ -1,17 +1,18 @@
 # Project Status
 
-_Last updated: 2026-05-26 (OPS-001 closed partial — Supabase + Vercel + AI Gateway provisioned; Sentry + speech provider (Sarvam, post-amendment) + MSG91 deferred; AUR-5 end-to-end smoke unblocked. Architecture amended 2026-05-26 — speech provider Bhashini → Sarvam AI primary, AI4Bharat OSS as DR.)_
+_Last updated: 2026-05-27 (AUR-5 AC4 paused — hardware blocker; Mac mini ordered. **AUR-2 brief promoted from stub via `/create-brief AUR-2` — awaiting HITL approval.** Plan v2 has been ahead-of-schedule overall; this is the first pause day.)_
 
 ## In flight
 
 - **AUR-5** (first story under AUR-1) — Happy-path passkey onboarding: language → handle → passkey → home stub. Status: `in-build`. **PR #1 merged 2026-05-25** (frontend slice, squash `ea6c8ef`). **PR #2 merged 2026-05-25** (backend slice, squash `7ce397c`). 40 tests passing. **AUR-5 end-to-end smoke green 2026-05-26** — on-device walkthrough on iOS via Expo Go against live Vercel + Supabase ap-south-1: AC1, AC2, AC3, AC7, AC8 (partial — `users` + `audit_log` rows confirmed in Supabase), AC11 all confirmed empirically; server-side `auth.passkey.beginEnrollment` returns HTTP 200 via curl. AC4 (passkey ceremony itself) blocked on Expo Go limitations — needs dev build + Apple App Site Association + Android Asset Links (logged as Issue in story DRI). PR #3 (Codex-owned E2E suite per workflow Phase 3) + AC4 dev-build work are the remaining open work before AUR-5 ships. See [`docs/bets/AUR-1/stories/AUR-5/`](./bets/AUR-1/stories/AUR-5/) — 4 new Issues logged today: AC4 dev-build deferral, 13-item Expo SDK 52 framework-issues catalog, misleading passkey-error UX, missing back-navigation affordance (Vivek on-device observation).
 - **AUR-1** — Onboarding bet. Status: `approved`. First story (AUR-5) ready for build; Story 2 (OTP fallback) blocked on MSG91 via OPS-001.
-- **MVP-PORTFOLIO v1** — Status: `approved`. AUR-1 in active development; AUR-2/AUR-3/AUR-4 still stubs.
+- **AUR-2** — Voice reflection loop + crisis safety. Status: `proposed` (brief promoted from stub 2026-05-27, awaiting HITL approval). `architecture_required: true` — `/create-bet-architecture AUR-2` is the next step after brief approval. First story will be the pre-MVP voice quality eval (R-PORTFOLIO-1 / R-SPEECH gating).
+- **MVP-PORTFOLIO v1** — Status: `approved`. AUR-1 in active development; AUR-2 promoted from stub 2026-05-27 (proposed); AUR-3/AUR-4 still stubs.
 - **OPS-001** — Status: **partial-shipped** (2026-05-26). Supabase (ap-south-1) + Vercel (`aura-web` + region pin) + AI Gateway (Anthropic + OpenAI + ZDR) live; 5 secrets in Vercel env. Sentry deferred to post-50-user cohort; **speech provider** (Sarvam AI per architecture amendment 2026-05-26 — superseded Bhashini) deferred to AUR-2 promotion; MSG91 deferred to public-store launch / Story 2 of AUR-1. All deferrals logged as DRI Decisions in `docs/ops/OPS-001.md`. R-OPS-2 (pg_uuidv7 unavailable) resolved via plpgsql `uuidv7()` in migration 0001.
 
 ## Awaiting human approval
 
-_None._
+- **AUR-2 brief** (promoted from stub 2026-05-27 via `/create-brief AUR-2`) — review at [`docs/bets/AUR-2/brief.md`](./bets/AUR-2/brief.md). Status: `proposed` → mark `approved` after review.
 
 ## MVP bet stubs (portfolio_stub: true until /create-brief promotion)
 
