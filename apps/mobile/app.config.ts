@@ -26,6 +26,13 @@ const config: ExpoConfig = {
     infoPlist: {
       NSMicrophoneUsageDescription:
         'Aura uses your microphone so you can speak in the language you think in.',
+      // Apple Export Compliance: we use only standard/exempt encryption
+      // (HTTPS + WebAuthn ceremonies + HMAC challenge tokens). Declaring
+      // false here avoids the App Store Connect export-compliance prompt
+      // on every TestFlight upload. If Aura later adds non-exempt crypto
+      // (e.g. end-to-end encrypted memories via custom protocol), this
+      // must flip to true and File a CCATS classification with the US BIS.
+      ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {
