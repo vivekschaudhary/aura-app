@@ -87,7 +87,7 @@ _Populated as each stub gets promoted to a full brief via `/create-brief <bet-id
 | Bet ID | Promoted on | Status after promotion |
 |--------|-------------|------------------------|
 | AUR-1 | 2026-05-24 | `approved` (Vivek, 2026-05-24) |
-| AUR-2 | 2026-05-27 | `proposed` (awaiting HITL approval) |
+| AUR-2 | 2026-05-27 | `approved` (Vivek, 2026-05-28) |
 | AUR-3 | — | — |
 | AUR-4 | — | — |
 

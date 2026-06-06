@@ -1,7 +1,7 @@
 ---
 id: AUR-2
 type: feature
-status: proposed
+status: approved
 priority: P0
 parent: FOUNDATION-PRODUCT
 portfolio_stub: false
@@ -10,6 +10,8 @@ parallel_with: []
 architecture_required: true
 created: 2026-05-24
 promoted: 2026-05-27
+approved: 2026-05-28
+approved_by: Vivek
 author: PM
 sources:
   - docs/foundation/portfolio.md
@@ -57,6 +59,7 @@ There's a second-order problem the voice loop must solve simultaneously: **users
 ## User
 
 **Primary cohort (first release):** the same ~50 hand-picked TestFlight users from AUR-1, now able to use the product for what it's actually for. Specifically:
+
 - **First-decision graduates** (persona 1): early-career users facing ambiguous life choices (career pivot, relationship, family pressure) without trusted adult counsel
 - **Mid-life pivots** (persona 2): users 30-45 navigating second-career, divorce, parenting decisions
 - **Informal-sector workers** (persona 3): a less-validated cohort per product R1 — included in the eval but the lowest-confidence segment
@@ -82,6 +85,7 @@ AUR-2 is **the load-bearing bet of the entire MVP portfolio**. Strategic reasoni
 > Traces to [product § North-star metric (WAR definition)](../../foundation/product.md), [product § Guardrails (Safety: ≥99% same-session escalation; Crisis-classifier precision ≥95%)](../../foundation/product.md), [architecture § Stack → AI orchestration + Speech + Crisis detection](../../foundation/architecture.md), [architecture amendment 2026-05-26 — Sarvam swap (SUPERSEDES Bhashini-primary decision)](../../foundation/architecture.md).
 
 **Falsifiable failure modes:**
+
 - Reflection Session completion <30% in the first 4 weeks of TestFlight → reflective-questioning conversation shape is wrong for the audience, or speech quality is too poor to sustain a conversation. Either way: redesign before scale-out.
 - ASR Hindi WER >25% on the in-house eval corpus → speech provider quality bar fails; escalate per R-SPEECH-2 to AI4Bharat OSS self-host OR architecture v3 amendment.
 - Crisis classifier precision <95% on red-team suite → cannot ship; story slips.
@@ -138,20 +142,24 @@ These get answered either in the AUR-2 architecture work (`/create-bet-architect
 Synthesized from inherited foundation + portfolio + architecture context. **Not a fresh research effort** — that lives in the first story (pre-MVP eval). New evidence below where the foundation docs were thin.
 
 **On vernacular voice quality (inherited from architecture R-SPEECH + 2026-05-26 amendment):**
+
 - AI4Bharat's IndicASR / IndicTTS models are academically strong on Indic-language benchmarks (clean speech, single speaker). Sarvam AI ships the same model lineage on production SaaS infrastructure.
 - The Bhashini platform (gov-ops layer) was rejected 2026-05-26 due to reported operational unreliability — see architecture amendment DRI.
 - Empirical performance on conversational + code-switched audio is **not validated**. R-SPEECH is the gating risk; first story under AUR-2 is the eval.
 
 **On reflective-counsel conversation shape:**
+
 - Direct prior art is thin. Closest analogues: Wysa (chat-based, English-primary, India), Replika (chat-based, English-primary, engagement-maximizing), Tele-MANAS (human-counselor helpline, no AI), Astrotalk (paid advisors, advice-giving, not reflective). None ship the combination Aura needs (voice + vernacular + reflective + free + safety-gated).
 - Reflective-questioning UX research is mostly therapist-training literature (motivational interviewing, Socratic dialogue, IFS, etc.). Need to extract the operational patterns that translate to a chatbot prompt — this is a system-prompt-engineering task, likely 2-3 iterations.
 
 **On crisis detection in vernacular AI counsel:**
+
 - Tele-MANAS (`14416`) is India's government mental-health helpline — public, free, 24/7. Established 2022. Architecture v1 inherits Tele-MANAS as the escalation surface; no separate vendor risk here.
 - Crisis-language detection in Hindi is harder than English — fewer pre-built classifiers, fewer red-team corpora. Keyword v1 (seeded from `packages/core/safety/keywords.ts`) is a deliberate floor — minimum viable safety, not the ceiling.
 - Industry pattern for crisis safety in AI products: keyword + LLM-based double-check + human-review pipeline. We ship keyword v1 only; LLM-classifier upgrade tracked as post-MVP bet.
 
 **On the anti-engagement stance (R-PORTFOLIO-3):**
+
 - This bet is the place to operationalize anti-engagement. The system prompt should encourage closure ("ready to step away?") not extension ("tell me more"). Re-engagement notifications are out of scope. WAR-as-metric is reframed: success is users completing a session and going away, not stayingby for hours.
 - This is NOT yet in product v2's metrics (product v2 lists DAU/MAU as a defensibility proxy — contradicts the stance). R-PORTFOLIO-3 carries the open product-amendment question; AUR-2 ships against the anti-engagement stance regardless.
 
@@ -270,4 +278,4 @@ _Populated automatically by `/measure` cron after bet enters in-build._
 
 ---
 
-_Approved by: <name> on <date>_
+_Approved by: Vivek on 2026-05-28._
